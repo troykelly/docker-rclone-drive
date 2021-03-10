@@ -106,6 +106,7 @@ ${RCLONE} lsd gcrypt:${DRIVE_TARGETFOLDER}
 RCLONECMD="${RCLONE} mount --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} gcrypt:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
+  echo ${RCLONECMD}
   nice -n 20 $RCLONECMD &
   child=$! 
   echo "Ready."
