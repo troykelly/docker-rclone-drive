@@ -11,7 +11,7 @@ services:
     volumes:
       - "/etc/localtime:/etc/localtime:ro"
       - type: bind
-        source: ${HOME}/Dev/docker-rclone-drive/data
+        source: ./data
         target: /mount
         bind:
           propagation: shared
