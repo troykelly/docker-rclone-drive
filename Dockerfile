@@ -33,9 +33,9 @@ RUN chmod +x /usr/sbin/mount.sh
 RUN addgroup -g 1000 ${APP_GROUP} && \
  adduser -D -h /home/${APP_USER} -s /sbin/nologin -u 1000 -G ${APP_GROUP} ${APP_USER} && \
  chgrp -R ${APP_GROUP} /usr/sbin/mount.sh && \
- mkdir /mount && \
- chown -R ${APP_USER}:${APP_GROUP} /mount
+ mkdir -p /mount /home/${APP_USER}/.config/rclone && \
+ chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER}
 
-# USER ${APP_USER}:${APP_GROUP}
+USER ${APP_USER}:${APP_GROUP}
 
 CMD ["/usr/sbin/mount.sh"]

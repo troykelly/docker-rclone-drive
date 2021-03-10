@@ -1,14 +1,11 @@
 #!/usr/bin/env sh
 
-DRIVE_USER=$(getent passwd "1000" | cut -d: -f1)
-DRIVE_HOMEDIR=$( getent passwd "${DRIVE_USER}" | cut -d: -f6 )
-RSYNCCONF="${DRIVE_HOMEDIR}/.config/rclone/rclone.conf"
-DRIVESERVICEACCOUNTFILE="${DRIVE_HOMEDIR}/.config/rclone/sa.conf"
+RSYNCCONF="${HOME}/.config/rclone/rclone.conf"
+SERVICEACCOUNTFILE="${HOME}/.config/rclone/sa.conf"
 RCLONE=$(command -v rclone)
 
 RSYNCCONFFOLDER=$(dirname ${RSYNCCONF})
 RSYNCCONFFILE=$(basename ${RSYNCCONF})
-
 
 if [ ! -f ${RSYNCCONF} ]; then
   mkdir -p ${RSYNCCONFFOLDER}
@@ -28,7 +25,7 @@ token = {"access_token":"${DRIVE_ACCESSTOKEN}","token_type":"Bearer","refresh_to
 team_drive = ${DRIVE_ROOTFOLDER}
 EOF
   elif [ ! -z ${DRIVE_PROJECT_ID} ]; then
-cat << EOF > ${DRIVESERVICEACCOUNTFILE}
+cat << EOF > ${SERVICEACCOUNTFILE}
 {
   "type": "service_account",
   "project_id": "${DRIVE_PROJECT_ID}",
@@ -49,7 +46,7 @@ client_id = ${GOOGLE_CLIENTID}
 client_secret = ${GOOGLE_CLIENTSECRET}
 scope = drive
 root_folder_id = 
-service_account_file = ${DRIVESERVICEACCOUNTFILE}
+service_account_file = ${SERVICEACCOUNTFILE}
 team_drive = ${DRIVE_ROOTFOLDER}
 use_trash = false
 skip_gdocs = true
@@ -79,8 +76,7 @@ password = ${GCRYPT_PASSWORD}
 password2 = ${GCRYPT_PASSWORD2}
 EOF
 
-chown -R 1000:1000 ${RSYNCCONFFOLDER}
-cat ${DRIVESERVICEACCOUNTFILE}
+cat ${SERVICEACCOUNTFILE}
 cat ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 fi
 
@@ -93,9 +89,9 @@ trap _term SIGTERM
 
 echo "Mounting..."
 mkdir -p /mount${DRIVE_MOUNTFOLDER}
-chown -R 1000:1000 /mount${DRIVE_MOUNTFOLDER}
-su-exec 1000:1000 ${RCLONE} lsd gcrypt:${DRIVE_TARGETFOLDER}
-RCLONECMD="su-exec 1000:1000 ${RCLONE} mount --vfs-cache-mode full --buffer-size 128M --vfs-read-ahead 512M gcrypt:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+chown -R $(id -u):$(id -g) /mount${DRIVE_MOUNTFOLDER}
+${RCLONE} lsd gcrypt:${DRIVE_TARGETFOLDER}
+RCLONECMD="${RCLONE} mount --vfs-cache-mode full --buffer-size 128M --vfs-read-ahead 512M gcrypt:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
   nice -n 20 $RCLONECMD &
