@@ -3,12 +3,11 @@
 DRIVE_USER=$(getent passwd "1000" | cut -d: -f1)
 DRIVE_HOMEDIR=$( getent passwd "${DRIVE_USER}" | cut -d: -f6 )
 RSYNCCONF="${DRIVE_HOMEDIR}/.config/rclone/rclone.conf"
-DRIVESERVICEACCOUNT="${DRIVE_HOMEDIR}/.config/rclone/sa.conf"
+DRIVESERVICEACCOUNTFILE="${DRIVE_HOMEDIR}/.config/rclone/sa.conf"
 RCLONE=$(command -v rclone)
 
 RSYNCCONFFOLDER=$(dirname ${RSYNCCONF})
 RSYNCCONFFILE=$(basename ${RSYNCCONF})
-DRIVESERVICEACCOUNTFILE=$(basename ${DRIVESERVICEACCOUNT})
 
 
 if [ ! -f ${RSYNCCONF} ]; then
@@ -29,7 +28,7 @@ token = {"access_token":"${DRIVE_ACCESSTOKEN}","token_type":"Bearer","refresh_to
 team_drive = ${DRIVE_ROOTFOLDER}
 EOF
   elif [ ! -z ${DRIVE_PROJECT_ID} ]; then
-cat << EOF > ${RSYNCCONFFOLDER}/${DRIVESERVICEACCOUNT}
+cat << EOF > ${DRIVESERVICEACCOUNTFILE}
 {
   "type": "service_account",
   "project_id": "${DRIVE_PROJECT_ID}",
@@ -50,7 +49,7 @@ client_id = ${GOOGLE_CLIENTID}
 client_secret = ${GOOGLE_CLIENTSECRET}
 scope = drive
 root_folder_id = 
-service_account_file = ${RSYNCCONFFOLDER}/${DRIVESERVICEACCOUNT}
+service_account_file = ${DRIVESERVICEACCOUNTFILE}
 team_drive = ${DRIVE_ROOTFOLDER}
 use_trash = false
 skip_gdocs = true
@@ -81,6 +80,8 @@ password2 = ${GCRYPT_PASSWORD2}
 EOF
 
 chown -R 1000:1000 ${RSYNCCONFFOLDER}
+cat ${DRIVESERVICEACCOUNTFILE}
+cat ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 fi
 
 _term() { 
