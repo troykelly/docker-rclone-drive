@@ -7,15 +7,15 @@ RCLONE=$(command -v rclone)
 RSYNCCONFFOLDER=$(dirname ${RSYNCCONF})
 RSYNCCONFFILE=$(basename ${RSYNCCONF})
 
-if [ ! -z ${RCLONE_BUFFER_SIZE} ]; then
+if [ -z ${RCLONE_BUFFER_SIZE} ]; then
   RCLONE_BUFFER_SIZE=128M
 fi
 
-if [ ! -z ${RCLONE_ZFS_CACHE_MODE} ]; then
+if [ -z ${RCLONE_ZFS_CACHE_MODE} ]; then
   RCLONE_ZFS_CACHE_MODE=minimal
 fi
 
-if [ ! -z ${RCLONE_ZFS_READ_AHEAD} ]; then
+if [ -z ${RCLONE_ZFS_READ_AHEAD} ]; then
   RCLONE_ZFS_READ_AHEAD=512M
 fi
 
