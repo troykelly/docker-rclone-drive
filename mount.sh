@@ -7,6 +7,18 @@ RCLONE=$(command -v rclone)
 RSYNCCONFFOLDER=$(dirname ${RSYNCCONF})
 RSYNCCONFFILE=$(basename ${RSYNCCONF})
 
+if [ ! -z ${RCLONE_BUFFER_SIZE} ]; then
+  RCLONE_BUFFER_SIZE=128M
+fi
+
+if [ ! -z ${RCLONE_ZFS_CACHE_MODE} ]; then
+  RCLONE_ZFS_CACHE_MODE=minimal
+fi
+
+if [ ! -z ${RCLONE_ZFS_READ_AHEAD} ]; then
+  RCLONE_ZFS_READ_AHEAD=512M
+fi
+
 if [ ! -f ${RSYNCCONF} ]; then
   mkdir -p ${RSYNCCONFFOLDER}
 
@@ -91,7 +103,7 @@ echo "Mounting..."
 mkdir -p /mount${DRIVE_MOUNTFOLDER}
 chown -R $(id -u):$(id -g) /mount${DRIVE_MOUNTFOLDER}
 ${RCLONE} lsd gcrypt:${DRIVE_TARGETFOLDER}
-RCLONECMD="${RCLONE} mount --vfs-cache-mode full --buffer-size 128M --vfs-read-ahead 512M gcrypt:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+RCLONECMD="${RCLONE} mount --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} gcrypt:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
   nice -n 20 $RCLONECMD &
