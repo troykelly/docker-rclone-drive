@@ -19,6 +19,10 @@ if [ -z ${RCLONE_ZFS_READ_AHEAD} ]; then
   RCLONE_ZFS_READ_AHEAD=512M
 fi
 
+if [ -z ${RCLONE_CACHE} ]; then
+  RCLONE_CACHE=false
+fi
+
 if [ ! -f ${RSYNCCONF} ]; then
   mkdir -p ${RSYNCCONFFOLDER}
 
@@ -70,6 +74,8 @@ EOF
     exit 1
   fi
 
+if [ "$RCLONE_CACHE" == "true" ]; then
+FILE_SOURCE=gcache
 cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 
 [gcache]
@@ -78,10 +84,16 @@ remote = gdrive:/gdrive
 chunk_size = 10M
 info_age = 1h0m0s
 chunk_total_size = 50G
+EOF
+else
+  FILE_SOURCE=gdrive
+fi
+
+cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 
 [gcrypt]
 type = crypt
-remote = gcache:/crypt
+remote = ${FILE_SOURCE}:/crypt
 filename_encryption = standard
 directory_name_encryption = true
 password = ${GCRYPT_PASSWORD}
