@@ -60,7 +60,7 @@ jobs:
               BUILD_DATE=${{ steps.prepare.outputs.build_date }}
               VCS_REF=${GITHUB_SHA::8}
           tags: |
-            troykelly/porn-vault:${{ steps.prepare.outputs.version }}
-            troykelly/porn-vault:latest
-            ghcr.io/troykelly/porn-vault:${{ steps.prepare.outputs.version }}
-            ghcr.io/troykelly/porn-vault:latest
+            troykelly/rclone-drive:${{ steps.prepare.outputs.version }}
+            troykelly/rclone-drive:latest
+            ghcr.io/troykelly/rclone-drive:${{ steps.prepare.outputs.version }}
+            ghcr.io/troykelly/rclone-drive:latest
