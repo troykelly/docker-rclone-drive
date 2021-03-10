@@ -75,7 +75,7 @@ EOF
   fi
 
 if [ "$RCLONE_CACHE" == "true" ]; then
-FILE_SOURCE=gcache
+FILE_REMOTE=gcache:
 cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 
 [gcache]
@@ -86,14 +86,14 @@ info_age = 1h0m0s
 chunk_total_size = 50G
 EOF
 else
-  FILE_SOURCE=gdrive
+  FILE_REMOTE=gdrive:/gdrive
 fi
 
 cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 
 [gcrypt]
 type = crypt
-remote = ${FILE_SOURCE}:/crypt
+remote = ${FILE_REMOTE}/crypt
 filename_encryption = standard
 directory_name_encryption = true
 password = ${GCRYPT_PASSWORD}
