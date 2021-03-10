@@ -31,7 +31,7 @@ cat << EOF > ${SERVICEACCOUNTFILE}
   "project_id": "${DRIVE_PROJECT_ID}",
   "private_key_id": "${DRIVE_PRIVATE_KEY_ID}",
   "private_key": "${DRIVE_PRIVATE_KEY}",
-  "client_email": ${DRIVE_CLIENT_EMAIL}",
+  "client_email": "${DRIVE_CLIENT_EMAIL}",
   "client_id": "${DRIVE_CLIENT_ID}",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
