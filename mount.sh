@@ -3,14 +3,18 @@
 DRIVE_USER=$(getent passwd "1000" | cut -d: -f1)
 DRIVE_HOMEDIR=$( getent passwd "${DRIVE_USER}" | cut -d: -f6 )
 RSYNCCONF="${DRIVE_HOMEDIR}/.config/rclone/rclone.conf"
+DRIVESERVICEACCOUNT="${DRIVE_HOMEDIR}/.config/rclone/sa.conf"
 RCLONE=$(command -v rclone)
 
 RSYNCCONFFOLDER=$(dirname ${RSYNCCONF})
 RSYNCCONFFILE=$(basename ${RSYNCCONF})
+DRIVESERVICEACCOUNTFILE=$(basename ${DRIVESERVICEACCOUNT})
+
 
 if [ ! -f ${RSYNCCONF} ]; then
   mkdir -p ${RSYNCCONFFOLDER}
 
+  if [ ! -z ${DRIVE_ACCESSTOKEN} ]; then
 cat << EOF > ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 [gdrive]
 type = drive
@@ -23,6 +27,42 @@ skip_gdocs = true
 chunk_size = 32M
 token = {"access_token":"${DRIVE_ACCESSTOKEN}","token_type":"Bearer","refresh_token":"${DRIVE_REFRESHTOKEN}","expiry":"${DRIVE_TOKENEXPIRY}"}
 team_drive = ${DRIVE_ROOTFOLDER}
+EOF
+  elif [ ! -z ${DRIVE_PROJECT_ID} ]; then
+cat << EOF > ${RSYNCCONFFOLDER}/${DRIVESERVICEACCOUNT}
+{
+  "type": "service_account",
+  "project_id": "${DRIVE_PROJECT_ID}",
+  "private_key_id": "${DRIVE_PRIVATE_KEY_ID}",
+  "private_key": "${DRIVE_PRIVATE_KEY}",
+  "client_email": ${DRIVE_CLIENT_EMAIL}",
+  "client_id": "${DRIVE_CLIENT_ID}",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "${DRIVE_CERTIFICATE_URL}"
+}
+EOF
+cat << EOF > ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
+[gdrive]
+type = drive
+client_id = ${GOOGLE_CLIENTID}
+client_secret = ${GOOGLE_CLIENTSECRET}
+scope = drive
+root_folder_id = 
+service_account_file = ${RSYNCCONFFOLDER}/${DRIVESERVICEACCOUNT}
+team_drive = ${DRIVE_ROOTFOLDER}
+use_trash = false
+skip_gdocs = true
+chunk_size = 128M
+EOF
+  else
+    echo "No access method (token or service account). Giving up."
+    sleep 10
+    exit 1
+  fi
+
+cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 
 [gcache]
 type = cache
