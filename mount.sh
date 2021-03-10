@@ -100,8 +100,6 @@ password = ${GCRYPT_PASSWORD}
 password2 = ${GCRYPT_PASSWORD2}
 EOF
 
-cat ${SERVICEACCOUNTFILE}
-cat ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 fi
 
 _term() { 
