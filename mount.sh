@@ -23,10 +23,21 @@ if [ -z ${RCLONE_CACHE} ]; then
   RCLONE_CACHE=false
 fi
 
-if [ ! -f ${RSYNCCONF} ]; then
-  mkdir -p ${RSYNCCONFFOLDER}
+if [ -z ${RCLONE_TEAMDRIVE} ]; then
+  RCLONE_TEAMDRIVE=false
+fi
 
-  if [ ! -z ${DRIVE_ACCESSTOKEN} ]; then
+if [ -z ${DRIVE_TARGETFOLDER} ]; then
+  DRIVE_TARGETFOLDER=
+fi
+
+mkdir -p ${RSYNCCONFFOLDER}
+
+# Remove old configuration
+if [ -f ${RSYNCCONF} ]; then
+  rm -Rf ${RSYNCCONF}
+fi
+
 cat << EOF > ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 [gdrive]
 type = drive
@@ -37,10 +48,21 @@ root_folder_id = ${DRIVE_ROOTFOLDER}
 use_trash = false
 skip_gdocs = true
 chunk_size = 32M
-token = {"access_token":"${DRIVE_ACCESSTOKEN}","token_type":"Bearer","refresh_token":"${DRIVE_REFRESHTOKEN}","expiry":"${DRIVE_TOKENEXPIRY}"}
+EOF
+
+if [ "$RCLONE_TEAMDRIVE" == "true" ]; then
+cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 team_drive = ${DRIVE_ROOTFOLDER}
 EOF
-  elif [ ! -z ${DRIVE_PROJECT_ID} ]; then
+
+if [ ! -z ${DRIVE_ACCESSTOKEN} ]; then
+cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
+token = {"access_token":"${DRIVE_ACCESSTOKEN}","token_type":"Bearer","refresh_token":"${DRIVE_REFRESHTOKEN}","expiry":"${DRIVE_TOKENEXPIRY}"}
+EOF
+elif [ ! -z ${DRIVE_PROJECT_ID} ]; then
+cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
+service_account_file = ${SERVICEACCOUNTFILE}
+EOF
 cat << EOF > ${SERVICEACCOUNTFILE}
 {
   "type": "service_account",
@@ -55,24 +77,11 @@ cat << EOF > ${SERVICEACCOUNTFILE}
   "client_x509_cert_url": "${DRIVE_CERTIFICATE_URL}"
 }
 EOF
-cat << EOF > ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
-[gdrive]
-type = drive
-client_id = ${GOOGLE_CLIENTID}
-client_secret = ${GOOGLE_CLIENTSECRET}
-scope = drive
-root_folder_id = 
-service_account_file = ${SERVICEACCOUNTFILE}
-team_drive = ${DRIVE_ROOTFOLDER}
-use_trash = false
-skip_gdocs = true
-chunk_size = 128M
-EOF
-  else
-    echo "No access method (token or service account). Giving up."
-    sleep 10
-    exit 1
-  fi
+else
+  echo "No access method (token or service account). Giving up."
+  sleep 10
+  exit 1
+fi
 
 if [ "$RCLONE_CACHE" == "true" ]; then
 FILE_REMOTE=gcache:
@@ -80,27 +89,33 @@ cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 
 [gcache]
 type = cache
-remote = gdrive:/gdrive
+remote = gdrive:
 chunk_size = 10M
 info_age = 1h0m0s
 chunk_total_size = 50G
 EOF
+if [ ! -z ${PLEX_HOST} ]; then
+cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
+plex_url = ${PLEX_HOST}
+plex_username = ${PLEX_USERNAME}
+plex_password = ${PLEX_PASSWORD}
+plex_token = ${PLEX_TOKEN}
+EOF
+fi
 else
-  FILE_REMOTE=gdrive:/gdrive
+  FILE_REMOTE=gdrive:
 fi
 
 cat << EOF >> ${RSYNCCONFFOLDER}/${RSYNCCONFFILE}
 
 [gcrypt]
 type = crypt
-remote = ${FILE_REMOTE}/crypt
+remote = ${FILE_REMOTE}
 filename_encryption = standard
 directory_name_encryption = true
 password = ${GCRYPT_PASSWORD}
 password2 = ${GCRYPT_PASSWORD2}
 EOF
-
-fi
 
 _term() { 
   echo "Shutting down..." 

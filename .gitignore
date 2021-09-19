@@ -1,3 +1,6 @@
+# Test config
+/.config
+
 # General
 .DS_Store
 .AppleDouble
