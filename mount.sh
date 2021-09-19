@@ -55,6 +55,14 @@ if [ -z ${DRIVE_MOUNTFOLDER} ]; then
   DRIVE_MOUNTFOLDER=/filestore
 fi
 
+if [ -z ${SHARE_UID} ]; then
+  SHARE_UID=1000
+fi
+
+if [ -z ${SHARE_GID} ]; then
+  SHARE_GID=1000
+fi
+
 mkdir -p ${RCLONE_CONFIG_DIR}
 
 # Remove old configuration
@@ -170,8 +178,8 @@ echo "🔌 Mounting ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}"
 trap _term SIGTERM
 
 fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
-mkdir -p /mount${DRIVE_MOUNTFOLDER}
-chown -R $(id -u):$(id -g) /mount${DRIVE_MOUNTFOLDER}
+mkdir -p /mount${DRIVE_MOUNTFOLDER} || true
+chown -R ${SHARE_UID}:${SHARE_GID} /mount${DRIVE_MOUNTFOLDER} || true
 ${RCLONE} lsd --config ${RCLONE_CONFIG} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}
 RCLONECMD="${RCLONE} mount --config ${RCLONE_CONFIG} --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
