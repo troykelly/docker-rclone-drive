@@ -51,10 +51,6 @@ if [ -z ${RCLONE_CRYPT_STORE} ]; then
   RCLONE_CRYPT_STORE=gcrypt
 fi
 
-if [ -z ${DRIVE_MOUNTFOLDER} ]; then
-  DRIVE_MOUNTFOLDER=/filestore
-fi
-
 if [ -z ${SHARE_UID} ]; then
   SHARE_UID=1000
 fi
