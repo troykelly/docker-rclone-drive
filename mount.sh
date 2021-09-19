@@ -63,6 +63,12 @@ if [ -z ${SHARE_GID} ]; then
   SHARE_GID=1000
 fi
 
+if [ ! -z ${USER_EMAIL} ]; then
+  DRIVE_IMPERSONATE="--drive-impersonate ${USER_EMAIL}"
+else
+  DRIVE_IMPERSONATE=
+fi
+
 mkdir -p ${RCLONE_CONFIG_DIR}
 
 # Remove old configuration
@@ -79,6 +85,7 @@ fi
 if [ ! -z "${DRIVE_ACCESSTOKEN}" ] && [ ! -z "${DRIVE_REFRESHTOKEN}" ] && [ ! -z "${DRIVE_TOKENEXPIRY}" ]; then
   RCLONE_TOKEN="{\"access_token\":\"${DRIVE_ACCESSTOKEN}\",\"token_type\":\"Bearer\",\"refresh_token\":\"${DRIVE_REFRESHTOKEN}\",\"expiry\":\"${DRIVE_TOKENEXPIRY}\"}"
   SERVICE_ACCOUNT_FILE=
+  DRIVE_IMPERSONATE=
 else
   RCLONE_TOKEN=
   if [ -z ${SERVICE_ACCOUNT_FILE} ]; then
@@ -142,6 +149,11 @@ fi
 echo "📝 Generating configuration in ${RCLONE_CONFIG}"
 touch ${RCLONE_CONFIG_LOG}
 
+if [ ! -z "${DRIVE_IMPERSONATE}" ]; then
+  GOOGLE_CLIENTID=
+  GOOGLE_CLIENTSECRET=
+fi
+
 if [ ! -z "${RCLONE_TOKEN}" ]; then
   ${RCLONE} config create --non-interactive --quiet --config ${RCLONE_CONFIG} ${RCLONE_PRIMARY_STORE} drive client_id=${GOOGLE_CLIENTID} client_secret=${GOOGLE_CLIENTSECRET} scope=drive root_folder_id=${RCLONE_ROOT_FOLDER_ID} team_drive=${RCLONE_TEAM_DRIVE} config_team_drive=${RCLONE_TEAM_DRIVE} use_trash=false skip_gdocs=true chunk_size=32M token=${RCLONE_TOKEN} config_refresh_token=false config_change_team_drive=${RCLONE_TEAMDRIVE} >> ${RCLONE_CONFIG_LOG} 2>&1
 else
@@ -180,8 +192,8 @@ trap _term SIGTERM
 fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
 mkdir -p /mount${DRIVE_MOUNTFOLDER} || true
 # chown -R ${SHARE_UID}:${SHARE_GID} /mount${DRIVE_MOUNTFOLDER} || true
-${RCLONE} lsd --config ${RCLONE_CONFIG} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}
-RCLONECMD="${RCLONE} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+${RCLONE} -v ${DRIVE_IMPERSONATE} --config ${RCLONE_CONFIG} lsd ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
   echo ${RCLONECMD}
