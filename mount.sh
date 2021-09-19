@@ -169,6 +169,7 @@ echo "🔌 Mounting ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}"
 
 trap _term SIGTERM
 
+fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
 mkdir -p /mount${DRIVE_MOUNTFOLDER}
 chown -R $(id -u):$(id -g) /mount${DRIVE_MOUNTFOLDER}
 ${RCLONE} lsd --config ${RCLONE_CONFIG} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}
