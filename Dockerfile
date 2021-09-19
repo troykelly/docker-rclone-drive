@@ -28,7 +28,8 @@ RUN cd ~ && \
  rm -Rf ./rclone*
 
 COPY ./mount.sh /usr/sbin/
-RUN chmod +x /usr/sbin/mount.sh
+COPY ./push.sh /usr/sbin/
+RUN chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh
 
 RUN addgroup -g 1000 ${APP_GROUP} && \
  adduser -D -h /home/${APP_USER} -s /sbin/nologin -u 1000 -G ${APP_GROUP} ${APP_USER} && \
