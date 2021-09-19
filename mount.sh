@@ -179,7 +179,7 @@ trap _term SIGTERM
 
 fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
 mkdir -p /mount${DRIVE_MOUNTFOLDER} || true
-chown -R ${SHARE_UID}:${SHARE_GID} /mount${DRIVE_MOUNTFOLDER} || true
+# chown -R ${SHARE_UID}:${SHARE_GID} /mount${DRIVE_MOUNTFOLDER} || true
 ${RCLONE} lsd --config ${RCLONE_CONFIG} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}
 RCLONECMD="${RCLONE} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
