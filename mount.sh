@@ -197,9 +197,10 @@ ${RCLONE} -v ${DRIVE_IMPERSONATE} --config ${RCLONE_CONFIG} lsd ${RCLONE_CRYPT_S
 RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
-  echo "🔌 Mounting ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}"
+  echo "🔌 Mounting ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} at /mount${DRIVE_MOUNTFOLDER}"
   nice -n 20 $RCLONECMD &
   child=$! 
+  ls -al /mount${DRIVE_MOUNTFOLDER}
   echo "💾 Ready (${child})."
   wait "$child"
   echo "🛑 Unmounting."
