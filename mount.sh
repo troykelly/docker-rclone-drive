@@ -17,7 +17,6 @@ if [ -z ${RCLONE_BUFFER_SIZE} ]; then
   RCLONE_BUFFER_SIZE=128M
 fi
 
-
 # https://rclone.org/commands/rclone_mount/#vfs-file-caching
 if [ -z ${RCLONE_ZFS_CACHE_MODE} ]; then
   RCLONE_ZFS_CACHE_MODE=minimal
@@ -69,6 +68,10 @@ else
   DRIVE_IMPERSONATE=
 fi
 
+if [ -z ${SERVICE_ACCOUNT_FILE} ]; then
+  SERVICE_ACCOUNT_FILE="${RCLONE_CONFIG_DIR}/sa.conf"
+fi
+
 mkdir -p ${RCLONE_CONFIG_DIR}
 
 # Remove old configuration
@@ -85,12 +88,8 @@ fi
 if [ ! -z "${DRIVE_ACCESSTOKEN}" ] && [ ! -z "${DRIVE_REFRESHTOKEN}" ] && [ ! -z "${DRIVE_TOKENEXPIRY}" ]; then
   RCLONE_TOKEN="{\"access_token\":\"${DRIVE_ACCESSTOKEN}\",\"token_type\":\"Bearer\",\"refresh_token\":\"${DRIVE_REFRESHTOKEN}\",\"expiry\":\"${DRIVE_TOKENEXPIRY}\"}"
   SERVICE_ACCOUNT_FILE=
-  DRIVE_IMPERSONATE=
 else
   RCLONE_TOKEN=
-  if [ -z ${SERVICE_ACCOUNT_FILE} ]; then
-    SERVICE_ACCOUNT_FILE="${RCLONE_CONFIG_DIR}/sa.conf"
-  fi
 fi
 
 _term() { 
@@ -109,17 +108,20 @@ if ! { [ "${RCLONE_TEAMDRIVE}" == "true" ] || [ "${RCLONE_TEAMDRIVE}" == "false"
   echo "RCLONE_TEAMDRIVE must be true or false - you set it as ${RCLONE_TEAMDRIVE}"
   FAILED=true
 fi
-
 if [ ! -z "${DRIVE_PROJECT_ID}" ] && [ ! -z "${DRIVE_PRIVATE_KEY_ID}" ] && [ ! -z "${DRIVE_PRIVATE_KEY}" ] && [ ! -z "${DRIVE_CLIENT_EMAIL}" ] && [ ! -z "${DRIVE_CLIENT_ID}" ] && [ ! -z "${DRIVE_CERTIFICATE_URL}" ] && [ ! -z "${RCLONE_TOKEN}" ]; then
   echo "Must supply either SA details DRIVE_PROJECT_ID etc or token details DRIVE_ACCESSTOKEN etc"
   FAILED=true
 fi
-if [ -z "${GOOGLE_CLIENTID}" ]; then
-  echo "Missing GOOGLE_CLIENTID"
+if [ ! -z "${DRIVE_IMPERSONATE}" ] && [ -z ${SERVICE_ACCOUNT_FILE} ]; then
+  echo "Must not set DRIVE_IMPERSONATE without using a service account."
   FAILED=true
 fi
-if [ -z "${GOOGLE_CLIENTSECRET}" ]; then
-  echo "Missing GOOGLE_CLIENTSECRET"
+if [ -z "${GOOGLE_CLIENTID}" ] && [ -z "${DRIVE_IMPERSONATE}" ]; then
+  echo "Missing GOOGLE_CLIENTID. Must supply unless using USER_EMAIL"
+  FAILED=true
+fi
+if [ -z "${GOOGLE_CLIENTSECRET}" ] && [ -z "${DRIVE_IMPERSONATE}" ]; then
+  echo "Missing GOOGLE_CLIENTSECRET. Must supply unless using USER_EMAIL"
   FAILED=true
 fi
 if [ -z "${DRIVE_ROOTFOLDER}" ]; then
@@ -185,7 +187,6 @@ fi
 ${RCLONE} config create --non-interactive --quiet --config ${RCLONE_CONFIG} --obscure ${RCLONE_CRYPT_STORE} crypt remote=${CRYPT_MOUNT_POINT} filename_encryption=standard directory_name_encryption=true password=${GCRYPT_PASSWORD} password2=${GCRYPT_PASSWORD2} >> ${RCLONE_CONFIG_LOG} 2>&1
 
 echo "📄 Config created."
-echo "🔌 Mounting ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}"
 
 trap _term SIGTERM
 
@@ -196,10 +197,10 @@ ${RCLONE} -v ${DRIVE_IMPERSONATE} --config ${RCLONE_CONFIG} lsd ${RCLONE_CRYPT_S
 RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
-  echo ${RCLONECMD}
+  echo "🔌 Mounting ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}"
   nice -n 20 $RCLONECMD &
   child=$! 
-  echo "💾 Ready."
+  echo "💾 Ready (${child})."
   wait "$child"
   echo "🛑 Unmounting."
   fusermount -u /mount${DRIVE_MOUNTFOLDER} && rm -Rf /mount${DRIVE_MOUNTFOLDER}
