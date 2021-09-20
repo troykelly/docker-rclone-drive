@@ -16,7 +16,8 @@
 	"extensions": [],
 	"containerEnv": {
 		"RCLONE_CONFIG_DIR": "${containerWorkspaceFolder}/.config",
-		"RCLONE_CONFIG": "${containerWorkspaceFolder}/.config/rclone.conf"
+		"RCLONE_CONFIG": "${containerWorkspaceFolder}/.config/rclone.conf",
+		"GENERATE_CONFIG": "${containerWorkspaceFolder}/generate-config.sh",
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.

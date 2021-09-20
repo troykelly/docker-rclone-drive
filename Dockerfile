@@ -29,7 +29,8 @@ RUN cd ~ && \
 
 COPY ./mount.sh /usr/sbin/
 COPY ./push.sh /usr/sbin/
-RUN chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh
+COPY ./generate-config.sh /usr/sbin/
+RUN chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh
 
 RUN addgroup -g 1000 ${APP_GROUP} && \
  adduser -D -h /home/${APP_USER} -s /sbin/nologin -u 1000 -G ${APP_GROUP} ${APP_USER} && \
