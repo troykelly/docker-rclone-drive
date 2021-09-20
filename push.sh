@@ -59,12 +59,12 @@ fi
 
 _term() { 
   echo "👋 Shutting down..."
+  KEEP_RUNNING=false
   if [ ! -z "${CHILD_RCLONE}" ]; then
     kill -TERM "$CHILD_RCLONE" 2>/dev/null
   fi
   if [ ! -z "${CHILD_SLEEP}" ]; then
     echo "Exiting sleep"
-    KEEP_RUNNING=false
     kill -TERM "$CHILD_SLEEP" 2>/dev/null
   fi
 }
@@ -78,14 +78,21 @@ RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} move --config ${RCLONE_CONFIG} --delet
 while :
 do
   nice -n 20 $RCLONECMD &
-  CHILD_RCLONE=$! 
+  CHILD_RCLONE=$!
+  echo ${CHILD_RCLONE} > ${RCLONE_PID_FILE}
   echo "💪 Moving."
   wait "$CHILD_RCLONE"
   echo "😴 Moving finished, sleeping."
+  if [ "$KEEP_RUNNING" != "true" ]; then
+    rm ${RCLONE_PID_FILE}
+    exit 0
+  fi  
   sleep 1800 &
   CHILD_SLEEP=$!
+  echo ${CHILD_SLEEP} > ${RCLONE_PID_FILE}
   wait "$CHILD_SLEEP"
   if [ "$KEEP_RUNNING" != "true" ]; then
+    rm ${RCLONE_PID_FILE}
     exit 0
   fi
 done
