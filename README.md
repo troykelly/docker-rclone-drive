@@ -3,6 +3,13 @@ Encrypted file mount
 
 Mounts Google Drive with encryption
 
+You can either mount a Google Drive, or Push all the files in a path to a Google Drive (hint)
+```yaml
+command: ["/usr/sbin/push.sh"]
+```
+
+This readme is rubbish at the moment - sorry - the details below are not even current
+
 | Environment Variable  | Notes                                                        | Required |
 |-----------------------|--------------------------------------------------------------|----------|
 | RCLONE_BUFFER_SIZE    | TBC                                                          | [ ]      |
