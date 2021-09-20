@@ -55,6 +55,10 @@ if [ -z ${SERVICE_ACCOUNT_FILE} ]; then
   SERVICE_ACCOUNT_FILE="${RCLONE_CONFIG_DIR}/sa.conf"
 fi
 
+if [ -z ${FORCE_NO_CRYPT} ]; then
+  FORCE_NO_CRYPT=false
+fi
+
 mkdir -p ${RCLONE_CONFIG_DIR}
 
 # Remove old configuration
@@ -114,6 +118,10 @@ if [ -z "${GCRYPT_PASSWORD2}" ]; then
   echo "Missing GCRYPT_PASSWORD2"
   FAILED=true
 fi
+if [ "$FORCE_NO_CRYPT" == "true" ] && ! ([ "${GCRYPT_PASSWORD}" == "DANGER" ] && [ "${GCRYPT_PASSWORD2}" == "DANGER" ]); then
+  echo "To use FORCE_NO_CRYPT, you must set both GCRYPT_PASSWORD and GCRYPT_PASSWORD2 to 'DANGER'"
+  FAILED=true
+fi
 if [ "$FAILED" == "true" ]; then
   config_error
 fi
@@ -132,6 +140,12 @@ touch ${RCLONE_CONFIG_LOG}
 if [ ! -z "${DRIVE_IMPERSONATE}" ]; then
   GOOGLE_CLIENTID=
   GOOGLE_CLIENTSECRET=
+fi
+
+if [ "$FORCE_NO_CRYPT" == "true" ]; then
+  echo "😱 Forcing to not use encryption. Jeez pal - seriously?"
+  GCRYPT_PASSWORD=
+  GCRYPT_PASSWORD2=
 fi
 
 if [ ! -z "${RCLONE_TOKEN}" ]; then
@@ -162,7 +176,9 @@ else
   CRYPT_MOUNT_POINT=${RCLONE_PRIMARY_STORE}:
 fi
 
-${RCLONE} config create --non-interactive --quiet --config ${RCLONE_CONFIG} --obscure ${RCLONE_CRYPT_STORE} crypt remote=${CRYPT_MOUNT_POINT} filename_encryption=standard directory_name_encryption=true password=${GCRYPT_PASSWORD} password2=${GCRYPT_PASSWORD2} >> ${RCLONE_CONFIG_LOG} 2>&1
+if [ "$FORCE_NO_CRYPT" != "true" ]; then
+  ${RCLONE} config create --non-interactive --quiet --config ${RCLONE_CONFIG} --obscure ${RCLONE_CRYPT_STORE} crypt remote=${CRYPT_MOUNT_POINT} filename_encryption=standard directory_name_encryption=true password=${GCRYPT_PASSWORD} password2=${GCRYPT_PASSWORD2} >> ${RCLONE_CONFIG_LOG} 2>&1
+fi
 
 echo "📄 Config created."
 exit 0

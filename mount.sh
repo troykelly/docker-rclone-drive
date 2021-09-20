@@ -11,6 +11,10 @@ if [ -z ${RCLONE_CONFIG} ]; then
   RCLONE_CONFIG="${HOME}/.config/rclone/rclone.conf"
 fi
 
+if [ -z ${RCLONE_PRIMARY_STORE} ]; then
+  RCLONE_PRIMARY_STORE=gdrive
+fi
+
 if [ -z ${RCLONE_CRYPT_STORE} ]; then
   RCLONE_CRYPT_STORE=gcrypt
 fi
@@ -40,6 +44,10 @@ if [ -z ${RCLONE_PID_FILE} ]; then
   RCLONE_PID_FILE=/tmp/rclone.pid
 fi
 
+if [ -z ${FORCE_NO_CRYPT} ]; then
+  FORCE_NO_CRYPT=false
+fi
+
 if [ -z ${RCLONE_PID_DIR} ]; then
   RCLONE_PID_DIR=$(dirname ${RCLONE_PID_FILE})
 fi
@@ -60,6 +68,12 @@ fi
 if ! ${GENERATE_CONFIG}; then
   echo "Failed to generate configuration file."
   exit 4
+fi
+
+if [ "$FORCE_NO_CRYPT" == "true" ]; then
+  RCLONE_MOUNT_POINT=${RCLONE_PRIMARY_STORE}
+else
+  RCLONE_MOUNT_POINT=${RCLONE_CRYPT_STORE}
 fi
 
 mkdir -p ${RCLONE_PID_DIR}
@@ -91,11 +105,11 @@ trap _term SIGTERM
 
 fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
 mkdir -p /mount${DRIVE_MOUNTFOLDER} || true
-${RCLONE} -v ${DRIVE_IMPERSONATE} --config ${RCLONE_CONFIG} lsd ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+${RCLONE} -v ${DRIVE_IMPERSONATE} --config ${RCLONE_CONFIG} lsd ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
-  echo "🔌 Mounting ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER} at /mount${DRIVE_MOUNTFOLDER}"
+  echo "🔌 Mounting ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} at /mount${DRIVE_MOUNTFOLDER}"
   nice -n 20 $RCLONECMD &
   CHILD_RCLONE=$! 
   echo ${CHILD_RCLONE} > ${RCLONE_PID_FILE}

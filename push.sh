@@ -11,6 +11,10 @@ if [ -z ${RCLONE_CONFIG} ]; then
   RCLONE_CONFIG="${HOME}/.config/rclone/rclone.conf"
 fi
 
+if [ -z ${RCLONE_PRIMARY_STORE} ]; then
+  RCLONE_PRIMARY_STORE=gdrive
+fi
+
 if [ -z ${RCLONE_CRYPT_STORE} ]; then
   RCLONE_CRYPT_STORE=gcrypt
 fi
@@ -21,6 +25,10 @@ fi
 
 if [ -z ${RCLONE_PID_FILE} ]; then
   RCLONE_PID_FILE=/tmp/rclone.pid
+fi
+
+if [ -z ${FORCE_NO_CRYPT} ]; then
+  FORCE_NO_CRYPT=false
 fi
 
 if [ -z ${RCLONE_PID_DIR} ]; then
@@ -43,6 +51,12 @@ fi
 if ! ${GENERATE_CONFIG}; then
   echo "Failed to generate configuration file."
   exit 4
+fi
+
+if [ "$FORCE_NO_CRYPT" == "true" ]; then
+  RCLONE_MOUNT_POINT=${RCLONE_PRIMARY_STORE}
+else
+  RCLONE_MOUNT_POINT=${RCLONE_CRYPT_STORE}
 fi
 
 mkdir -p ${RCLONE_PID_DIR}
@@ -69,12 +83,19 @@ _term() {
   fi
 }
 
-echo "🔌 Pusing to ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}"
+if [ ! -d "/upload" ]; then
+  echo "😩 There is no /upload. Nothing to do."
+  echo "  Sleeping for 10 seconds."
+  sleep 10
+  exit 0
+fi
+
+echo "🔌 Pusing to ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
 
 trap _term SIGTERM
 
 KEEP_RUNNING=true
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_CRYPT_STORE}:${DRIVE_TARGETFOLDER}"
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
 while :
 do
   nice -n 20 $RCLONECMD &
@@ -82,7 +103,7 @@ do
   echo ${CHILD_RCLONE} > ${RCLONE_PID_FILE}
   echo "💪 Moving."
   wait "$CHILD_RCLONE"
-  echo "😴 Moving finished, sleeping."
+  echo "😴 Sleeping."
   if [ "$KEEP_RUNNING" != "true" ]; then
     rm ${RCLONE_PID_FILE}
     exit 0
