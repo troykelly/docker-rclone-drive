@@ -90,7 +90,8 @@ if [ ! -d "/upload" ]; then
   exit 0
 fi
 
-echo "🔌 Pusing to ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
+echo "🔌 Pusing to ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} in 30 seconds (wait for mounts)"
+sleep 30
 
 trap _term SIGTERM
 
