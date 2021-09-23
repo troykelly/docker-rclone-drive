@@ -35,6 +35,15 @@ if [ -z ${RCLONE_PID_DIR} ]; then
   RCLONE_PID_DIR=$(dirname ${RCLONE_PID_FILE})
 fi
 
+# https://rclone.org/docs/#bwlimit-bandwidth-spec
+if [ -z ${BANDWIDTH_INGRESS} ]; then
+  BANDWIDTH_INGRESS=off
+fi
+
+if [ -z ${BANDWIDTH_EGRESS} ]; then
+  BANDWIDTH_EGRESS=off
+fi
+
 if [ ! -z ${USER_EMAIL} ]; then
   DRIVE_IMPERSONATE="--drive-impersonate ${USER_EMAIL}"
 else
@@ -96,7 +105,7 @@ sleep 30
 trap _term SIGTERM
 
 KEEP_RUNNING=true
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
 while :
 do
   nice -n 20 $RCLONECMD &

@@ -44,6 +44,14 @@ if [ -z ${RCLONE_PID_FILE} ]; then
   RCLONE_PID_FILE=/tmp/rclone.pid
 fi
 
+if [ -z ${BANDWIDTH_INGRESS} ]; then
+  BANDWIDTH_INGRESS=off
+fi
+
+if [ -z ${BANDWIDTH_EGRESS} ]; then
+  BANDWIDTH_EGRESS=off
+fi
+
 if [ -z ${FORCE_NO_CRYPT} ]; then
   FORCE_NO_CRYPT=false
 fi
@@ -106,7 +114,7 @@ trap _term SIGTERM
 fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
 mkdir -p /mount${DRIVE_MOUNTFOLDER} || true
 ${RCLONE} -v ${DRIVE_IMPERSONATE} --config ${RCLONE_CONFIG} lsd ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
   echo "🔌 Mounting ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} at /mount${DRIVE_MOUNTFOLDER}"
