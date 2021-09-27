@@ -1,35 +1,35 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the README at:
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.194.0/containers/alpine
 {
-	"name": "Alpine",
-	"build": {
-		"dockerfile": "Dockerfile",
-		// Update 'VARIANT' to pick an Alpine version: 3.11, 3.12, 3.13, 3.14
-		"args": { "VARIANT": "3.14", "WORKSPACE_FOLDER": "${localWorkspaceFolder}" }
-	},
-	
-	// Set *default* container specific settings.json values on container create. 
-	"settings": {},
+  "name": "Alpine",
+  "build": {
+    "dockerfile": "Dockerfile",
+    // Update 'VARIANT' to pick an Alpine version: 3.11, 3.12, 3.13, 3.14
+    "args": { "VARIANT": "3.14", "WORKSPACE_FOLDER": "${localWorkspaceFolder}" }
+  },
 
-	// Add the IDs of extensions you want installed when the container is created.
-	// Note that some extensions may not work in Alpine Linux. See https://aka.ms/vscode-remote/linux.
-	"extensions": [],
-	"containerEnv": {
-		"RCLONE_CONFIG_DIR": "${containerWorkspaceFolder}/.config",
-		"RCLONE_CONFIG": "${containerWorkspaceFolder}/.config/rclone.conf",
-		"GENERATE_CONFIG": "${containerWorkspaceFolder}/generate-config.sh",
-	},
+  // Set *default* container specific settings.json values on container create.
+  "settings": {},
 
-	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	// "forwardPorts": [],
+  // Add the IDs of extensions you want installed when the container is created.
+  // Note that some extensions may not work in Alpine Linux. See https://aka.ms/vscode-remote/linux.
+  "extensions": [],
+  "containerEnv": {
+    "RCLONE_CONFIG_DIR": "${containerWorkspaceFolder}/.config",
+    "RCLONE_CONFIG": "${containerWorkspaceFolder}/.config/rclone.conf",
+    "GENERATE_CONFIG": "${containerWorkspaceFolder}/generate-config.sh"
+  },
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  // "forwardPorts": [],
 
-	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
-	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
-	"runArgs": ["--env-file",".env"],
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "uname -a",
 
-	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "vscode"
+  // Uncomment when using a ptrace-based debugger like C++, Go, and Rust
+  // "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
+  "runArgs": ["--env-file", ".env"],
+
+  // Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "vscode"
 }
