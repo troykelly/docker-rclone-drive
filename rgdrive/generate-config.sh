@@ -3,72 +3,72 @@
 
 RCLONE=$(command -v rclone)
 
-if [ -z ${RCLONE_CONFIG} ]; then
+if [ -z "${RCLONE_CONFIG}" ]; then
   RCLONE_CONFIG="${HOME}/.config/rclone/rclone.conf"
 fi
 
-if [ -z ${RCLONE_CONFIG_DIR} ]; then
+if [ -z "${RCLONE_CONFIG_DIR}" ]; then
   RCLONE_CONFIG_DIR=$(dirname ${RCLONE_CONFIG})
 fi
 
 RCLONE_CONFIG_LOG="${RCLONE_CONFIG_DIR}/config.log"
 
-if [ -z ${RCLONE_CACHE} ]; then
+if [ -z "${RCLONE_CACHE}" ]; then
   RCLONE_CACHE=false
 fi
 
-if [ -z ${RCLONE_TEAMDRIVE} ]; then
+if [ -z "${RCLONE_TEAMDRIVE}" ]; then
   RCLONE_TEAMDRIVE=false
 fi
 
-if [ -z ${DRIVE_TARGETFOLDER} ]; then
+if [ -z "${DRIVE_TARGETFOLDER}" ]; then
   DRIVE_TARGETFOLDER=
 fi
 
-if [ -z ${RCLONE_PRIMARY_STORE} ]; then
+if [ -z "${RCLONE_PRIMARY_STORE}" ]; then
   RCLONE_PRIMARY_STORE=gdrive
 fi
 
-if [ -z ${RCLONE_CACHE_STORE} ]; then
+if [ -z "${RCLONE_CACHE_STORE}" ]; then
   RCLONE_CACHE_STORE=gcache
 fi
 
-if [ -z ${RCLONE_CRYPT_STORE} ]; then
+if [ -z "${RCLONE_CRYPT_STORE}" ]; then
   RCLONE_CRYPT_STORE=gcrypt
 fi
 
-if [ -z ${SHARE_UID} ]; then
+if [ -z "${SHARE_UID}" ]; then
   SHARE_UID=1000
 fi
 
-if [ -z ${SHARE_GID} ]; then
+if [ -z "${SHARE_GID}" ]; then
   SHARE_GID=1000
 fi
 
-if [ ! -z ${USER_EMAIL} ]; then
+if [ ! -z "${USER_EMAIL}" ]; then
   DRIVE_IMPERSONATE="--drive-impersonate ${USER_EMAIL}"
 else
   DRIVE_IMPERSONATE=
 fi
 
-if [ -z ${SERVICE_ACCOUNT_FILE} ]; then
+if [ -z "${SERVICE_ACCOUNT_FILE}" ]; then
   SERVICE_ACCOUNT_FILE="${RCLONE_CONFIG_DIR}/sa.conf"
 fi
 
-if [ -z ${FORCE_NO_CRYPT} ]; then
+if [ -z "${FORCE_NO_CRYPT}" ]; then
   FORCE_NO_CRYPT=false
 fi
 
 mkdir -p ${RCLONE_CONFIG_DIR}
 
 # Remove old configuration
-if [ -f ${RCLONE_CONFIG} ]; then
+if [ -f "${RCLONE_CONFIG}" ]; then
   rm -Rf ${RCLONE_CONFIG}
 fi
-if [ -f ${SERVICE_ACCOUNT_FILE} ]; then
+if [ -f "${SERVICE_ACCOUNT_FILE}" ]; then
   rm -Rf ${SERVICE_ACCOUNT_FILE}
 fi
-if [ -f ${RCLONE_CONFIG_LOG} ]; then
+if [ -f "${RCLONE_CONFIG_LOG}" ]; then
   rm -Rf ${RCLONE_CONFIG_LOG}
 fi
 
@@ -94,7 +94,7 @@ if [ ! -z "${DRIVE_PROJECT_ID}" ] && [ ! -z "${DRIVE_PRIVATE_KEY_ID}" ] && [ ! -
   echo "Must supply either SA details DRIVE_PROJECT_ID etc or token details DRIVE_ACCESSTOKEN etc"
   FAILED=true
 fi
-if [ ! -z "${DRIVE_IMPERSONATE}" ] && [ -z ${SERVICE_ACCOUNT_FILE} ]; then
+if [ ! -z "${DRIVE_IMPERSONATE}" ] && [ -z "${SERVICE_ACCOUNT_FILE}" ]; then
   echo "Must not set DRIVE_IMPERSONATE without using a service account."
   FAILED=true
 fi

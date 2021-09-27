@@ -3,48 +3,48 @@
 
 RCLONE=$(command -v rclone)
 
-if [ -z ${GENERATE_CONFIG} ]; then
+if [ -z "${GENERATE_CONFIG}" ]; then
   GENERATE_CONFIG="/usr/sbin/generate-config.sh"
 fi
 
-if [ -z ${RCLONE_CONFIG} ]; then
+if [ -z "${RCLONE_CONFIG}" ]; then
   RCLONE_CONFIG="${HOME}/.config/rclone/rclone.conf"
 fi
 
-if [ -z ${RCLONE_PRIMARY_STORE} ]; then
+if [ -z "${RCLONE_PRIMARY_STORE}" ]; then
   RCLONE_PRIMARY_STORE=gdrive
 fi
 
-if [ -z ${RCLONE_CRYPT_STORE} ]; then
+if [ -z "${RCLONE_CRYPT_STORE}" ]; then
   RCLONE_CRYPT_STORE=gcrypt
 fi
 
-if [ -z ${DRIVE_TARGETFOLDER} ]; then
+if [ -z "${DRIVE_TARGETFOLDER}" ]; then
   DRIVE_TARGETFOLDER=
 fi
 
-if [ -z ${RCLONE_PID_FILE} ]; then
+if [ -z "${RCLONE_PID_FILE}" ]; then
   RCLONE_PID_FILE=/tmp/rclone.pid
 fi
 
-if [ -z ${FORCE_NO_CRYPT} ]; then
+if [ -z "${FORCE_NO_CRYPT}" ]; then
   FORCE_NO_CRYPT=false
 fi
 
-if [ -z ${RCLONE_PID_DIR} ]; then
+if [ -z "${RCLONE_PID_DIR}" ]; then
   RCLONE_PID_DIR=$(dirname ${RCLONE_PID_FILE})
 fi
 
 # https://rclone.org/docs/#bwlimit-bandwidth-spec
-if [ -z ${BANDWIDTH_INGRESS} ]; then
+if [ -z "${BANDWIDTH_INGRESS}" ]; then
   BANDWIDTH_INGRESS=off
 fi
 
-if [ -z ${BANDWIDTH_EGRESS} ]; then
+if [ -z "${BANDWIDTH_EGRESS}" ]; then
   BANDWIDTH_EGRESS=off
 fi
 
-if [ ! -z ${USER_EMAIL} ]; then
+if [ ! -z "${USER_EMAIL}" ]; then
   DRIVE_IMPERSONATE="--drive-impersonate ${USER_EMAIL}"
 else
   DRIVE_IMPERSONATE=
@@ -70,7 +70,7 @@ fi
 
 mkdir -p ${RCLONE_PID_DIR}
 
-if [ -f ${RCLONE_PID_FILE} ]; then
+if [ -f "${RCLONE_PID_FILE}" ]; then
   RCLONE_PID=$(<"$RCLONE_PID_FILE")
   if ps -p ${RCLONE_PID} > /dev/null
   then
