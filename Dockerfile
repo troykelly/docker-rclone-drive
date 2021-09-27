@@ -2,20 +2,26 @@ FROM alpine
 
 ARG APP_USER=drive
 ARG APP_GROUP=drive
+ARG BUILD_DESCRIPTION="Access an encrypted google drive"
+ARG BUILD_NAME="RClone Mount Google Drive"
 ARG BUILD_DATE
-ARG VCS_REF
-ARG VERSION
+ARG BUILD_REF
+ARG BUILD_REPOSITORY
+ARG BUILD_VERSION
 
-LABEL org.opencontainers.image.source https://github.com/troykelly/docker-rclone-drive
-LABEL org.label-schema.build-date=$BUILD_DATE \
-  org.label-schema.name="RClone Mount Google Drive" \
-  org.label-schema.description="Access an encrypted google drive" \
-  org.label-schema.url="https://github.com/troykelly/docker-rclone-drive" \
-  org.label-schema.vcs-ref=$VCS_REF \
-  org.label-schema.vcs-url="https://github.com/troykelly/docker-rclone-drive" \
-  org.label-schema.vendor="Troy Kelly" \
-  org.label-schema.version=$VERSION \
-  org.label-schema.schema-version="1.0"
+LABEL \
+    maintainer="Troy Kelly <troy@troykelly.com>" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.vendor="Troy Kelly" \
+    org.opencontainers.image.authors="Troy Kelly <troy@troykelly.com>" \
+    org.opencontainers.image.licenses="Apache-2.0" \
+    org.opencontainers.image.url="https://troykelly" \
+    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.revision=${BUILD_REF} \
+    org.opencontainers.image.version=${BUILD_VERSION}
 RUN apk add --no-cache --update curl unzip fuse su-exec
 
 RUN cd ~ && \

@@ -27,13 +27,22 @@ if [ -z ${DRIVE_MOUNTFOLDER} ]; then
   DRIVE_MOUNTFOLDER=/filestore
 fi
 
-# https://rclone.org/commands/rclone_mount/#vfs-file-caching
-if [ -z ${RCLONE_ZFS_CACHE_MODE} ]; then
-  RCLONE_ZFS_CACHE_MODE=minimal
+# Deprecated: I made a mistake and called these ZFS - so backwards compat for now
+if [ ! -z ${RCLONE_ZFS_CACHE_MODE} ]; then
+  RCLONE_VFS_CACHE_MODE=${RCLONE_ZFS_CACHE_MODE}
 fi
 
-if [ -z ${RCLONE_ZFS_READ_AHEAD} ]; then
-  RCLONE_ZFS_READ_AHEAD=512M
+if [ ! -z ${RCLONE_ZFS_READ_AHEAD} ]; then
+  RCLONE_VFS_READ_AHEAD=${RCLONE_ZFS_READ_AHEAD}
+fi
+
+# https://rclone.org/commands/rclone_mount/#vfs-file-caching
+if [ -z ${RCLONE_VFS_CACHE_MODE} ]; then
+  RCLONE_VFS_CACHE_MODE=minimal
+fi
+
+if [ -z ${RCLONE_VFS_READ_AHEAD} ]; then
+  RCLONE_VFS_READ_AHEAD=512M
 fi
 
 if [ -z ${RCLONE_BUFFER_SIZE} ]; then
@@ -114,7 +123,7 @@ trap _term SIGTERM
 fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
 mkdir -p /mount${DRIVE_MOUNTFOLDER} || true
 ${RCLONE} -v ${DRIVE_IMPERSONATE} --config ${RCLONE_CONFIG} lsd ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_ZFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_ZFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_VFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_VFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
   echo "🔌 Mounting ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} at /mount${DRIVE_MOUNTFOLDER}"
