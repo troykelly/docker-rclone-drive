@@ -77,7 +77,7 @@ fi
 
 if [[ ! -x "$GENERATE_CONFIG" ]]
 then
-  echo "Unable to generate configuration. "${GENERATE_CONFIG}" is not executable."
+  echo "Unable to generate configuration. ${GENERATE_CONFIG} is not executable."
   exit 3
 fi
 
@@ -93,7 +93,7 @@ else
   RCLONE_MOUNT_POINT=${RCLONE_CRYPT_STORE}
 fi
 
-mkdir -p ${RCLONE_PID_DIR}
+mkdir -p "${RCLONE_PID_DIR}"
 
 if [ -f "${RCLONE_PID_FILE}" ]; then
   RCLONE_PID=$(<"$RCLONE_PID_FILE")
@@ -121,9 +121,9 @@ _term() {
 trap _term SIGTERM
 
 fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
-mkdir -p /mount${DRIVE_MOUNTFOLDER} || true
-${RCLONE} -v "${DRIVE_IMPERSONATE}" --config "${RCLONE_CONFIG}" lsd "${RCLONE_MOUNT_POINT}":${DRIVE_TARGETFOLDER}
-RCLONECMD="${RCLONE} "${DRIVE_IMPERSONATE}" --bwlimit "${BANDWIDTH_EGRESS}":${BANDWIDTH_INGRESS} mount --config "${RCLONE_CONFIG}" --allow-non-empty --vfs-cache-mode "${RCLONE_VFS_CACHE_MODE}" --buffer-size "${RCLONE_BUFFER_SIZE}" --vfs-read-ahead "${RCLONE_VFS_READ_AHEAD}" "${RCLONE_MOUNT_POINT}":${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+mkdir -p "/mount${DRIVE_MOUNTFOLDER}" || true
+${RCLONE} -v "${DRIVE_IMPERSONATE}" --config "${RCLONE_CONFIG}" lsd "${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_VFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_VFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
   echo "🔌 Mounting ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} at /mount${DRIVE_MOUNTFOLDER}"

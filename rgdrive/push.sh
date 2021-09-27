@@ -105,7 +105,7 @@ sleep 30
 trap _term SIGTERM
 
 KEEP_RUNNING=true
-RCLONECMD="${RCLONE} "${DRIVE_IMPERSONATE}" --bwlimit "${BANDWIDTH_EGRESS}":${BANDWIDTH_INGRESS} move --config "${RCLONE_CONFIG}" --delete-after -v --stats 60s /upload "${RCLONE_MOUNT_POINT}":${DRIVE_TARGETFOLDER}"
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
 while :
 do
   nice -n 20 $RCLONECMD &
