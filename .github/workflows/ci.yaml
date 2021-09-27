@@ -27,6 +27,7 @@ jobs:
       - name: ℹ️ Gather version and environment
         id: information
         shell: bash
+# yamllint disable-line rule:line-length
         run: |
           sha="${{ github.sha }}"
           environment="edge"
@@ -152,6 +153,7 @@ jobs:
         run: bash <(curl https://getvcn.codenotary.com -L)
       - name: ℹ️ Compose build flags
         id: flags
+# yamllint disable-line rule:line-length
         run: |
           echo "::set-output name=date::$(date +"%Y-%m-%dT%H:%M:%SZ")"
 
