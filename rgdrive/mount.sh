@@ -28,11 +28,11 @@ if [ -z "${DRIVE_MOUNTFOLDER}" ]; then
 fi
 
 # Deprecated: I made a mistake and called these ZFS - so backwards compat for now
-if [ ! -z "${RCLONE_ZFS_CACHE_MODE}" ]; then
+if [ -n "${RCLONE_ZFS_CACHE_MODE}" ]; then
   RCLONE_VFS_CACHE_MODE=${RCLONE_ZFS_CACHE_MODE}
 fi
 
-if [ ! -z "${RCLONE_ZFS_READ_AHEAD}" ]; then
+if [ -n "${RCLONE_ZFS_READ_AHEAD}" ]; then
   RCLONE_VFS_READ_AHEAD=${RCLONE_ZFS_READ_AHEAD}
 fi
 
@@ -66,10 +66,10 @@ if [ -z "${FORCE_NO_CRYPT}" ]; then
 fi
 
 if [ -z "${RCLONE_PID_DIR}" ]; then
-  RCLONE_PID_DIR=$(dirname ${RCLONE_PID_FILE})
+  RCLONE_PID_DIR=$(dirname "${RCLONE_PID_FILE}")
 fi
 
-if [ ! -z "${USER_EMAIL}" ]; then
+if [ -n "${USER_EMAIL}" ]; then
   DRIVE_IMPERSONATE="--drive-impersonate ${USER_EMAIL}"
 else
   DRIVE_IMPERSONATE=
@@ -77,12 +77,12 @@ fi
 
 if [[ ! -x "$GENERATE_CONFIG" ]]
 then
-  echo "Unable to generate configuration. ${GENERATE_CONFIG} is not executable."
+  echo "Unable to generate configuration. "${GENERATE_CONFIG}" is not executable."
   exit 3
 fi
 
 # Generate configuration files
-if ! ${GENERATE_CONFIG}; then
+if ! "${GENERATE_CONFIG}"; then
   echo "Failed to generate configuration file."
   exit 4
 fi
@@ -97,7 +97,7 @@ mkdir -p ${RCLONE_PID_DIR}
 
 if [ -f "${RCLONE_PID_FILE}" ]; then
   RCLONE_PID=$(<"$RCLONE_PID_FILE")
-  if ps -p ${RCLONE_PID} > /dev/null
+  if ps -p "${RCLONE_PID}" > /dev/null
   then
     echo "RClone is running as PID ${RCLONE_PID}"
     exit 1
@@ -107,13 +107,13 @@ fi
 
 _term() { 
   echo "👋 Shutting down..."
-  if [ ! -z "${CHILD_RCLONE}" ]; then
+  if [ -n "${CHILD_RCLONE}" ]; then
     kill -TERM "$CHILD_RCLONE" 2>/dev/null
   fi
-  if [ ! -z "${CHILD_UNMOUNT}" ]; then
+  if [ -n "${CHILD_UNMOUNT}" ]; then
     echo "Waiting for unmount"
   fi
-  if [ ! -z "${CHILD_RM}" ]; then
+  if [ -n "${CHILD_RM}" ]; then
     echo "Waiting for cleanup"
   fi
 }
@@ -122,24 +122,24 @@ trap _term SIGTERM
 
 fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
 mkdir -p /mount${DRIVE_MOUNTFOLDER} || true
-${RCLONE} -v ${DRIVE_IMPERSONATE} --config ${RCLONE_CONFIG} lsd ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_VFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_VFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+${RCLONE} -v "${DRIVE_IMPERSONATE}" --config "${RCLONE_CONFIG}" lsd "${RCLONE_MOUNT_POINT}":${DRIVE_TARGETFOLDER}
+RCLONECMD="${RCLONE} "${DRIVE_IMPERSONATE}" --bwlimit "${BANDWIDTH_EGRESS}":${BANDWIDTH_INGRESS} mount --config "${RCLONE_CONFIG}" --allow-non-empty --vfs-cache-mode "${RCLONE_VFS_CACHE_MODE}" --buffer-size "${RCLONE_BUFFER_SIZE}" --vfs-read-ahead "${RCLONE_VFS_READ_AHEAD}" "${RCLONE_MOUNT_POINT}":${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
   echo "🔌 Mounting ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} at /mount${DRIVE_MOUNTFOLDER}"
   nice -n 20 $RCLONECMD &
   CHILD_RCLONE=$! 
-  echo ${CHILD_RCLONE} > ${RCLONE_PID_FILE}
+  echo "${CHILD_RCLONE}" > ${RCLONE_PID_FILE}
   echo "💾 Ready (${CHILD_RCLONE})."
   wait "$CHILD_RCLONE"
   fusermount -u /mount${DRIVE_MOUNTFOLDER} &
   CHILD_UNMOUNT=$!
-  echo ${CHILD_UNMOUNT} > ${RCLONE_PID_FILE}
+  echo "${CHILD_UNMOUNT}" > ${RCLONE_PID_FILE}
   echo "🛑 Unmounting."
   wait "$CHILD_UNMOUNT"
   rm -Rf /mount${DRIVE_MOUNTFOLDER} &
   CHILD_RM=$!
-  echo ${CHILD_RM} > ${RCLONE_PID_FILE}
+  echo "${CHILD_RM}" > ${RCLONE_PID_FILE}
   echo "␡ Remove mount point"
   wait "$CHILD_RM"
   rm ${RCLONE_PID_FILE}

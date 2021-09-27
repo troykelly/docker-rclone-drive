@@ -32,7 +32,7 @@ if [ -z "${FORCE_NO_CRYPT}" ]; then
 fi
 
 if [ -z "${RCLONE_PID_DIR}" ]; then
-  RCLONE_PID_DIR=$(dirname ${RCLONE_PID_FILE})
+  RCLONE_PID_DIR=$(dirname "${RCLONE_PID_FILE}")
 fi
 
 # https://rclone.org/docs/#bwlimit-bandwidth-spec
@@ -44,7 +44,7 @@ if [ -z "${BANDWIDTH_EGRESS}" ]; then
   BANDWIDTH_EGRESS=off
 fi
 
-if [ ! -z "${USER_EMAIL}" ]; then
+if [ -n "${USER_EMAIL}" ]; then
   DRIVE_IMPERSONATE="--drive-impersonate ${USER_EMAIL}"
 else
   DRIVE_IMPERSONATE=
@@ -57,7 +57,7 @@ then
 fi
 
 # Generate configuration files
-if ! ${GENERATE_CONFIG}; then
+if ! "${GENERATE_CONFIG}"; then
   echo "Failed to generate configuration file."
   exit 4
 fi
@@ -72,7 +72,7 @@ mkdir -p ${RCLONE_PID_DIR}
 
 if [ -f "${RCLONE_PID_FILE}" ]; then
   RCLONE_PID=$(<"$RCLONE_PID_FILE")
-  if ps -p ${RCLONE_PID} > /dev/null
+  if ps -p "${RCLONE_PID}" > /dev/null
   then
     echo "RClone is running as PID ${RCLONE_PID}"
     exit 1
@@ -83,10 +83,10 @@ fi
 _term() { 
   echo "👋 Shutting down..."
   KEEP_RUNNING=false
-  if [ ! -z "${CHILD_RCLONE}" ]; then
+  if [ -n "${CHILD_RCLONE}" ]; then
     kill -TERM "$CHILD_RCLONE" 2>/dev/null
   fi
-  if [ ! -z "${CHILD_SLEEP}" ]; then
+  if [ -n "${CHILD_SLEEP}" ]; then
     echo "Exiting sleep"
     kill -TERM "$CHILD_SLEEP" 2>/dev/null
   fi
@@ -105,12 +105,12 @@ sleep 30
 trap _term SIGTERM
 
 KEEP_RUNNING=true
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
+RCLONECMD="${RCLONE} "${DRIVE_IMPERSONATE}" --bwlimit "${BANDWIDTH_EGRESS}":${BANDWIDTH_INGRESS} move --config "${RCLONE_CONFIG}" --delete-after -v --stats 60s /upload "${RCLONE_MOUNT_POINT}":${DRIVE_TARGETFOLDER}"
 while :
 do
   nice -n 20 $RCLONECMD &
   CHILD_RCLONE=$!
-  echo ${CHILD_RCLONE} > ${RCLONE_PID_FILE}
+  echo "${CHILD_RCLONE}" > ${RCLONE_PID_FILE}
   echo "💪 Moving."
   wait "$CHILD_RCLONE"
   echo "😴 Sleeping."
@@ -120,7 +120,7 @@ do
   fi  
   sleep 1800 &
   CHILD_SLEEP=$!
-  echo ${CHILD_SLEEP} > ${RCLONE_PID_FILE}
+  echo "${CHILD_SLEEP}" > ${RCLONE_PID_FILE}
   wait "$CHILD_SLEEP"
   if [ "$KEEP_RUNNING" != "true" ]; then
     rm ${RCLONE_PID_FILE}

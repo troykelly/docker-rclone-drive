@@ -59,6 +59,7 @@ jobs:
         uses: brpaz/hadolint-action@v1.5.0
         with:
           dockerfile: "./rgdrive/Dockerfile"
+          ignore: "DL3003 DL3007"
 
   lint-json:
     name: JSON Lint

@@ -8,7 +8,7 @@ if [ -z "${RCLONE_CONFIG}" ]; then
 fi
 
 if [ -z "${RCLONE_CONFIG_DIR}" ]; then
-  RCLONE_CONFIG_DIR=$(dirname ${RCLONE_CONFIG})
+  RCLONE_CONFIG_DIR=$(dirname "${RCLONE_CONFIG}")
 fi
 
 RCLONE_CONFIG_LOG="${RCLONE_CONFIG_DIR}/config.log"
@@ -45,7 +45,7 @@ if [ -z "${SHARE_GID}" ]; then
   SHARE_GID=1000
 fi
 
-if [ ! -z "${USER_EMAIL}" ]; then
+if [ -n "${USER_EMAIL}" ]; then
   DRIVE_IMPERSONATE="--drive-impersonate ${USER_EMAIL}"
 else
   DRIVE_IMPERSONATE=
@@ -72,7 +72,7 @@ if [ -f "${RCLONE_CONFIG_LOG}" ]; then
   rm -Rf ${RCLONE_CONFIG_LOG}
 fi
 
-if [ ! -z "${DRIVE_ACCESSTOKEN}" ] && [ ! -z "${DRIVE_REFRESHTOKEN}" ] && [ ! -z "${DRIVE_TOKENEXPIRY}" ]; then
+if [ -n "${DRIVE_ACCESSTOKEN}" ] && [ -n "${DRIVE_REFRESHTOKEN}" ] && [ -n "${DRIVE_TOKENEXPIRY}" ]; then
   RCLONE_TOKEN="{\"access_token\":\"${DRIVE_ACCESSTOKEN}\",\"token_type\":\"Bearer\",\"refresh_token\":\"${DRIVE_REFRESHTOKEN}\",\"expiry\":\"${DRIVE_TOKENEXPIRY}\"}"
   SERVICE_ACCOUNT_FILE=
 else
@@ -90,11 +90,11 @@ if ! { [ "${RCLONE_TEAMDRIVE}" == "true" ] || [ "${RCLONE_TEAMDRIVE}" == "false"
   echo "RCLONE_TEAMDRIVE must be true or false - you set it as ${RCLONE_TEAMDRIVE}"
   FAILED=true
 fi
-if [ ! -z "${DRIVE_PROJECT_ID}" ] && [ ! -z "${DRIVE_PRIVATE_KEY_ID}" ] && [ ! -z "${DRIVE_PRIVATE_KEY}" ] && [ ! -z "${DRIVE_CLIENT_EMAIL}" ] && [ ! -z "${DRIVE_CLIENT_ID}" ] && [ ! -z "${DRIVE_CERTIFICATE_URL}" ] && [ ! -z "${RCLONE_TOKEN}" ]; then
+if [ -n "${DRIVE_PROJECT_ID}" ] && [ -n "${DRIVE_PRIVATE_KEY_ID}" ] && [ -n "${DRIVE_PRIVATE_KEY}" ] && [ -n "${DRIVE_CLIENT_EMAIL}" ] && [ -n "${DRIVE_CLIENT_ID}" ] && [ -n "${DRIVE_CERTIFICATE_URL}" ] && [ -n "${RCLONE_TOKEN}" ]; then
   echo "Must supply either SA details DRIVE_PROJECT_ID etc or token details DRIVE_ACCESSTOKEN etc"
   FAILED=true
 fi
-if [ ! -z "${DRIVE_IMPERSONATE}" ] && [ -z "${SERVICE_ACCOUNT_FILE}" ]; then
+if [ -n "${DRIVE_IMPERSONATE}" ] && [ -z "${SERVICE_ACCOUNT_FILE}" ]; then
   echo "Must not set DRIVE_IMPERSONATE without using a service account."
   FAILED=true
 fi
@@ -137,7 +137,7 @@ fi
 echo "📝 Generating configuration in ${RCLONE_CONFIG}"
 touch ${RCLONE_CONFIG_LOG}
 
-if [ ! -z "${DRIVE_IMPERSONATE}" ]; then
+if [ -n "${DRIVE_IMPERSONATE}" ]; then
   GOOGLE_CLIENTID=
   GOOGLE_CLIENTSECRET=
 fi
@@ -148,8 +148,8 @@ if [ "$FORCE_NO_CRYPT" == "true" ]; then
   GCRYPT_PASSWORD2=
 fi
 
-if [ ! -z "${RCLONE_TOKEN}" ]; then
-  ${RCLONE} config create --non-interactive --quiet --config ${RCLONE_CONFIG} ${RCLONE_PRIMARY_STORE} drive client_id=${GOOGLE_CLIENTID} client_secret=${GOOGLE_CLIENTSECRET} scope=drive root_folder_id=${RCLONE_ROOT_FOLDER_ID} team_drive=${RCLONE_TEAM_DRIVE} config_team_drive=${RCLONE_TEAM_DRIVE} use_trash=false skip_gdocs=true chunk_size=32M token=${RCLONE_TOKEN} config_refresh_token=false config_change_team_drive=${RCLONE_TEAMDRIVE} >> ${RCLONE_CONFIG_LOG} 2>&1
+if [ -n "${RCLONE_TOKEN}" ]; then
+  "${RCLONE}" config create --non-interactive --quiet --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id=${GOOGLE_CLIENTID} client_secret=${GOOGLE_CLIENTSECRET} scope=drive root_folder_id=${RCLONE_ROOT_FOLDER_ID} team_drive=${RCLONE_TEAM_DRIVE} config_team_drive=${RCLONE_TEAM_DRIVE} use_trash=false skip_gdocs=true chunk_size=32M token=${RCLONE_TOKEN} config_refresh_token=false config_change_team_drive=${RCLONE_TEAMDRIVE} >> "${RCLONE_CONFIG_LOG}" 2>&1
 else
   cat << EOF > ${SERVICE_ACCOUNT_FILE}
 {
@@ -166,18 +166,18 @@ else
 }
 EOF
 
-  ${RCLONE} config create --non-interactive --quiet --config ${RCLONE_CONFIG} ${RCLONE_PRIMARY_STORE} drive client_id=${GOOGLE_CLIENTID} client_secret=${GOOGLE_CLIENTSECRET} scope=drive root_folder_id=${RCLONE_ROOT_FOLDER_ID} team_drive=${RCLONE_TEAM_DRIVE} config_team_drive=${RCLONE_TEAM_DRIVE} use_trash=false skip_gdocs=true chunk_size=32M service_account_file=${SERVICE_ACCOUNT_FILE} config_change_team_drive=${RCLONE_TEAMDRIVE} >> ${RCLONE_CONFIG_LOG} 2>&1
+  "${RCLONE}" config create --non-interactive --quiet --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id=${GOOGLE_CLIENTID} client_secret=${GOOGLE_CLIENTSECRET} scope=drive root_folder_id=${RCLONE_ROOT_FOLDER_ID} team_drive=${RCLONE_TEAM_DRIVE} config_team_drive=${RCLONE_TEAM_DRIVE} use_trash=false skip_gdocs=true chunk_size=32M service_account_file=${SERVICE_ACCOUNT_FILE} config_change_team_drive=${RCLONE_TEAMDRIVE} >> "${RCLONE_CONFIG_LOG}" 2>&1
 fi
 
 if [ "$RCLONE_CACHE" == "true" ]; then
-  ${RCLONE} config create --non-interactive --quiet --config ${RCLONE_CONFIG} ${RCLONE_CACHE_STORE} cache remote=${RCLONE_PRIMARY_STORE}: chunk_size=10M info_age=1d chunk_total_size=1G >> ${RCLONE_CONFIG_LOG} 2>&1
+  "${RCLONE}" config create --non-interactive --quiet --config "${RCLONE_CONFIG}" "${RCLONE_CACHE_STORE}" cache remote=${RCLONE_PRIMARY_STORE}: chunk_size=10M info_age=1d chunk_total_size=1G >> "${RCLONE_CONFIG_LOG}" 2>&1
   CRYPT_MOUNT_POINT=${RCLONE_CACHE_STORE}:
 else
   CRYPT_MOUNT_POINT=${RCLONE_PRIMARY_STORE}:
 fi
 
 if [ "$FORCE_NO_CRYPT" != "true" ]; then
-  ${RCLONE} config create --non-interactive --quiet --config ${RCLONE_CONFIG} --obscure ${RCLONE_CRYPT_STORE} crypt remote=${CRYPT_MOUNT_POINT} filename_encryption=standard directory_name_encryption=true password=${GCRYPT_PASSWORD} password2=${GCRYPT_PASSWORD2} >> ${RCLONE_CONFIG_LOG} 2>&1
+  "${RCLONE}" config create --non-interactive --quiet --config "${RCLONE_CONFIG}" --obscure "${RCLONE_CRYPT_STORE}" crypt remote=${CRYPT_MOUNT_POINT} filename_encryption=standard directory_name_encryption=true password=${GCRYPT_PASSWORD} password2=${GCRYPT_PASSWORD2} >> "${RCLONE_CONFIG_LOG}" 2>&1
 fi
 
 echo "📄 Config created."
