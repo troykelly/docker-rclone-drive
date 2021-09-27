@@ -128,7 +128,7 @@ jobs:
             troykelly/rclone-drive:${{ steps.prepare.outputs.version }}
           # yamllint enable rule:line-length
           context: .
-          file: ./Dockerfile
+          file: ./rgdrive/Dockerfile
           cache-from: |
             type=local,src=/tmp/.docker-cache
             ghcr.io/troykelly/rclone-drive:edge

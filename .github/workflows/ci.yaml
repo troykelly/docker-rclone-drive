@@ -59,7 +59,7 @@ jobs:
         uses: frenck/action-addon-linter@v2.3
         with:
           community: true
-          path: "./${{ needs.information.outputs.target }}"
+          path: "./rgdrive"
 
   lint-hadolint:
     name: Hadolint
@@ -72,7 +72,7 @@ jobs:
       - name: 🚀 Run Hadolint
         uses: brpaz/hadolint-action@v1.5.0
         with:
-          dockerfile: "./${{ needs.information.outputs.target }}/Dockerfile"
+          dockerfile: "./rgdrive/Dockerfile"
 
   lint-json:
     name: JSON Lint
@@ -188,7 +188,7 @@ jobs:
         with:
           push: false
           context: .
-          file: ./Dockerfile
+          file: ./rgdrive/Dockerfile
           cache-from: |
             type=local,src=/tmp/.docker-cache
             ghcr.io/troykelly/rclone-drive:edge
