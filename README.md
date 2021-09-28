@@ -11,7 +11,7 @@ command: ["/usr/sbin/push.sh"]
 ```
 
 This readme is rubbish at the moment - sorry - the details below are not even current
-
+<!-- markdownlint-disable -->
 | Environment Variable  | Notes                                                        | Required |
 | --------------------- | ------------------------------------------------------------ | -------- |
 | RCLONE_BUFFER_SIZE    | TBC                                                          | [ ]      |
@@ -38,3 +38,4 @@ This readme is rubbish at the moment - sorry - the details below are not even cu
 | DRIVE_CERTIFICATE_URL | Service Account: The certificate url                         | [ ]      |
 | GCRYPT_PASSWORD       | The password for encryption                                  | [ ]      |
 | GCRYPT_PASSWORD2      | The salt for the password                                    | [ ]      |
+<!-- markdownlint-enable -->
