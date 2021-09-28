@@ -1,8 +1,8 @@
 FROM alpine:latest
 
-ARG TARGETOS
-ARG TARGETARCH
-ARG TARGETVARIANT
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+ARG TARGETVARIANT=
 
 ARG APP_USER=drive
 ARG APP_GROUP=drive
@@ -15,29 +15,28 @@ ARG BUILD_VERSION
 
 COPY rootfs /
 
-RUN echo Building for ${TARGETARCH}
-RUN echo Building os ${TARGETOS}
-RUN echo Building varient ${TARGETVARIANT}
-
-RUN apk add --no-cache --update curl=7.79.1-r0 unzip=6.0-r9 fuse=2.9.9-r1 su-exec=0.2-r1 && \
+RUN apk add --no-cache --update curl=7.79.1-r0 unzip=6.0-r9 fuse=2.9.9-r1 su-exec=0.2-r1 libarchive-tools=3.5.1-r0 && \
  addgroup -g 1000 ${APP_GROUP} && \
  adduser -D -h /home/${APP_USER} -s /sbin/nologin -u 1000 -G ${APP_GROUP} ${APP_USER} && \
  mkdir -p /mount /home/${APP_USER}/.config/rclone && \
  chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER}
 
-COPY rootfs /
 RUN chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh &&\
     chgrp -R ${APP_GROUP} /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh
 
 WORKDIR /home/${APP_USER}
 
-RUN curl -O https://downloads.rclone.org/rclone-current-${TARGETOS}-${TARGETARCH}.zip && \
- unzip rclone-current-${TARGETOS}-${TARGETARCH}.zip && \
- cd rclone-*-${TARGETOS}-${TARGETARCH} && \
+RUN if [ "$TARGETARCH" == "arm" ] && [ "$TARGETVARIANT" == "v7" ] ;\
+    then curl -L https://downloads.rclone.org/rclone-current-${TARGETOS}-${TARGETARCH}-${TARGETVARIANT}.zip -o rclone-current-${TARGETOS}-${TARGETARCH}.zip ;\
+    else curl -LO https://downloads.rclone.org/rclone-current-${TARGETOS}-${TARGETARCH}.zip ; fi && \
+ mkdir rclone-current-${TARGETOS}-${TARGETARCH} && \
+ cd rclone-current-${TARGETOS}-${TARGETARCH} && \
+ bsdtar -xf ../rclone-current-${TARGETOS}-${TARGETARCH}.zip -s'|[^/]*/||' && \
  cp rclone /usr/bin/ && \
  chmod 755 /usr/bin/rclone && \
  cd .. && \
- rm -Rf ./rclone*
+ rm -Rf ./rclone* && \
+ /usr/bin/rclone version --check
 
 USER ${APP_USER}:${APP_GROUP}
 

@@ -117,7 +117,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    name: Build
+    name: 👷 Build
     needs:
       - information
       - lint-hadolint
@@ -130,6 +130,24 @@ jobs:
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2
+
+      - name: 📝 Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            troykelly/rclone-drive
+            ghcr.io/troykelly/rclone-drive
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
 
       - name: 🏗 Set up build cache
         id: cache
@@ -151,7 +169,7 @@ jobs:
 
       - name: 🏗 Set up CodeNotary
         run: bash <(curl https://getvcn.codenotary.com -L)
-
+        
       - name: 🚀 Build
         uses: docker/build-push-action@v2
         with:
@@ -159,6 +177,8 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: ./rgdrive
           file: ./rgdrive/Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
           # yamllint disable-line rule:line-length
