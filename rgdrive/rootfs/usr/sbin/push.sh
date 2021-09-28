@@ -108,7 +108,7 @@ KEEP_RUNNING=true
 RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
 while :
 do
-  nice -n 20 "$RCLONECMD" &
+  nice -n 20 $RCLONECMD &
   CHILD_RCLONE=$!
   echo "${CHILD_RCLONE}" > ${RCLONE_PID_FILE}
   echo "💪 Moving."
