@@ -4,13 +4,18 @@ Encrypted file mount
 
 Mounts Google Drive with encryption
 
-You can either mount a Google Drive, or Push all the files in a path to a Google Drive (hint)
+You can either mount a Google Drive, or
+Push all the files in a path to a Google Drive (hint)
 
 ```yaml
 command: ["/usr/sbin/push.sh"]
 ```
 
-This readme is rubbish at the moment - sorry - the details below are not even current
+This readme is rubbish at the moment - sorry -
+the details below are not even current
+
+<!-- markdownlint-capture -->
+<!-- markdownlint-disable -->
 
 | Environment Variable  | Notes                                                        | Required |
 | --------------------- | ------------------------------------------------------------ | -------- |
@@ -38,3 +43,5 @@ This readme is rubbish at the moment - sorry - the details below are not even cu
 | DRIVE_CERTIFICATE_URL | Service Account: The certificate url                         | [ ]      |
 | GCRYPT_PASSWORD       | The password for encryption                                  | [ ]      |
 | GCRYPT_PASSWORD2      | The salt for the password                                    | [ ]      |
+
+<!-- markdownlint-enable -->

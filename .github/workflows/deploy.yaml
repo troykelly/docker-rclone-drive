@@ -33,6 +33,7 @@ jobs:
         uses: actions/checkout@v2
       - name: ℹ️ Gather version and environment
         id: information
+        # yamllint disable rule:line-length
         run: |
           sha="${{ github.sha }}"
           environment="edge"
@@ -52,90 +53,82 @@ jobs:
 
           echo "::set-output name=name::Drive rclone"
           echo "::set-output name=description::Provides a mount for a google drive folder"
-
+        # yamllint enable rule:line-length
   deploy:
-    name: 👷 Build & Deploy ${{ matrix.architecture }}
-    needs: information
+    name: 👷 Build & Deploy
+    needs:
+      - information
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        architecture:
-          - aarch64
-          - amd64
-          - armhf
-          - armv7
-          - i386
     steps:
-      - name: 🔂 Wait for other runs to complete
-        uses: softprops/turnstyle@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2
+
+      - name: 📝 Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            troykelly/rclone-drive
+            ghcr.io/troykelly/rclone-drive
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+            type=sha
+
       - name: 🏗 Set up build cache
         id: cache
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2
         with:
-          path: /tmp/.docker-cache
-          key: docker-${{ matrix.architecture }}-${{ github.sha }}
+          path: /tmp/.buildx-cache
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
           restore-keys: |
-            docker-${{ matrix.architecture }}
+            ${{ runner.os }}-multi-buildx
+
       - name: 🏗 Set up QEMU
-        uses: docker/setup-qemu-action@v1.2.0
+        uses: docker/setup-qemu-action@v1
+
       - name: 🏗 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1.6.0
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
       - name: 🏗 Set up CodeNotary
         run: bash <(curl https://getvcn.codenotary.com -L)
-      - name: ℹ️ Compose build flags
-        id: flags
-        run: |
-          echo "::set-output name=date::$(date +"%Y-%m-%dT%H:%M:%SZ")"
 
-          if [[ "${{ matrix.architecture}}" = "amd64" ]]; then
-            echo "::set-output name=platform::linux/amd64"
-          elif [[ "${{ matrix.architecture }}" = "i386" ]]; then
-            echo "::set-output name=platform::linux/386"
-          elif [[ "${{ matrix.architecture }}" = "armhf" ]]; then
-            echo "::set-output name=platform::linux/arm/v6"
-          elif [[ "${{ matrix.architecture }}" = "armv7" ]]; then
-            echo "::set-output name=platform::linux/arm/v7"
-          elif [[ "${{ matrix.architecture }}" = "aarch64" ]]; then
-            echo "::set-output name=platform::linux/arm64/v8"
-          else
-            echo "::error ::Could not determine platform for architecture ${{ matrix.architecture }}"
-            exit 1
-          fi
       - name: 🏗  Login to Docker Container Registry
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
       - name: 🏗  Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CI_PAT }}
+
       - name: 🚀 Build
         uses: docker/build-push-action@v2
         with:
-          load: true
-          # yamllint disable rule:line-length
-          tags: |
-            ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.environment }}
-            ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.version }}
-            troykelly/rclone-drive:${{ needs.information.outputs.environment }}
-            troykelly/rclone-drive:${{ steps.prepare.outputs.version }}
-          # yamllint enable rule:line-length
-          context: .
-          file: ./Dockerfile
-          cache-from: |
-            type=local,src=/tmp/.docker-cache
-            ghcr.io/troykelly/rclone-drive:edge
-          cache-to: type=local,mode=max,dest=/tmp/.docker-cache-new
-          platforms: ${{ steps.flags.outputs.platform }}
+          push: true
+          builder: ${{ steps.buildx.outputs.name }}
+          context: ./rgdrive
+          file: ./rgdrive/Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          # yamllint disable-line rule:line-length
+          platforms: linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8
           build-args: |
-            BUILD_ARCH=${{ matrix.architecture }}
             BUILD_DATE=${{ steps.flags.outputs.date }}
             BUILD_DESCRIPTION=${{ needs.information.outputs.description }}
             BUILD_NAME=${{ needs.information.outputs.name }}
@@ -148,8 +141,9 @@ jobs:
       # https://github.com/moby/buildkit/issues/1896
       - name: 🚚 Swap build cache
         run: |
-          rm -rf /tmp/.docker-cache
-          mv /tmp/.docker-cache-new /tmp/.docker-cache
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
       - name: 🔏 Notarize
         # yamllint disable rule:line-length
         run: |
@@ -165,19 +159,22 @@ jobs:
               --public \
               "docker://ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.version }}"
           fi
+        # yamllint enable rule:line-length
         env:
           VCN_USER: ${{ secrets.VCN_USER }}
           VCN_PASSWORD: ${{ secrets.VCN_PASSWORD }}
           VCN_NOTARIZATION_PASSWORD: ${{ secrets.VCN_NOTARIZATION_PASSWORD }}
           VCN_OTP_EMPTY: true
-      - name: 🚀 Push
         # yamllint disable rule:line-length
-        run: |
-          docker push \
-            "ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
-          docker push \
-            "ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.version }}"
-          docker push \
-            "troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
-          docker push \
-            "troykelly/rclone-drive:${{ steps.prepare.outputs.version }}"
+      # - name: 🚀 Push
+      #
+      #   run:
+      #     docker push \
+      #       "ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
+      #     docker push \
+      #       "ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.version }}"
+      #     docker push \
+      #       "troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
+      #     docker push \
+      #       "troykelly/rclone-drive:${{ steps.prepare.outputs.version }}"
+      # yamllint enable rule:line-length
