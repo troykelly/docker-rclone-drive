@@ -161,7 +161,7 @@ jobs:
           file: ./rgdrive/Dockerfile
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
-          #yamllint disable-line rule:line-length
+          # yamllint disable-line rule:line-length
           platforms: linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8
           build-args: |
             BUILD_DATE=${{ steps.flags.outputs.date }}
