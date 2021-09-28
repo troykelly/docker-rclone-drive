@@ -19,14 +19,13 @@ RUN apk add --no-cache --update curl=7.79.1-r0 unzip=6.0-r9 fuse=2.9.9-r1 su-exe
  addgroup -g 1000 ${APP_GROUP} && \
  adduser -D -h /home/${APP_USER} -s /sbin/nologin -u 1000 -G ${APP_GROUP} ${APP_USER} && \
  mkdir -p /mount /home/${APP_USER}/.config/rclone && \
- chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER}
-
-RUN chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh &&\
-    chgrp -R ${APP_GROUP} /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh
+ chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER} && \
+ chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh &&\
+ chgrp -R ${APP_GROUP} /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh
 
 WORKDIR /home/${APP_USER}
 
-RUN if [ "$TARGETARCH" == "arm" ] && [ "$TARGETVARIANT" == "v7" ] ;\
+RUN if [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ] ;\
     then curl -L https://downloads.rclone.org/rclone-current-${TARGETOS}-${TARGETARCH}-${TARGETVARIANT}.zip -o rclone-current-${TARGETOS}-${TARGETARCH}.zip ;\
     else curl -LO https://downloads.rclone.org/rclone-current-${TARGETOS}-${TARGETARCH}.zip ; fi && \
  mkdir rclone-current-${TARGETOS}-${TARGETARCH} && \
