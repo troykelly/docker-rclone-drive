@@ -117,7 +117,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    name: Build ${{ matrix.architecture }}
+    name: Build
     needs:
       - information
       - lint-hadolint
@@ -127,63 +127,41 @@ jobs:
       - lint-shellcheck
       - lint-yamllint
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        architecture:
-          - aarch64
-          - amd64
-          - armhf
-          - armv7
-          - i386
     steps:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2
+
       - name: 🏗 Set up build cache
         id: cache
         uses: actions/cache@v2
         with:
-          path: /tmp/.docker-cache
-          key: docker-${{ matrix.architecture }}-${{ github.sha }}
+          path: /tmp/.buildx-cache
+          # Key is named differently to avoid collision
+          key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
           restore-keys: |
-            docker-${{ matrix.architecture }}
+            ${{ runner.os }}-multi-buildx
+
       - name: 🏗 Set up QEMU
         uses: docker/setup-qemu-action@v1
+
       - name: 🏗 Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+
       - name: 🏗 Set up CodeNotary
         run: bash <(curl https://getvcn.codenotary.com -L)
-      - name: ℹ️ Compose build flags
-        id: flags
-        # yamllint disable rule:line-length
-        run: |
-          echo "::set-output name=date::$(date +"%Y-%m-%dT%H:%M:%SZ")"
 
-          if [[ "${{ matrix.architecture}}" = "amd64" ]]; then
-            echo "::set-output name=platform::linux/amd64"
-          elif [[ "${{ matrix.architecture }}" = "i386" ]]; then
-            echo "::set-output name=platform::linux/386"
-          elif [[ "${{ matrix.architecture }}" = "armhf" ]]; then
-            echo "::set-output name=platform::linux/arm/v6"
-          elif [[ "${{ matrix.architecture }}" = "armv7" ]]; then
-            echo "::set-output name=platform::linux/arm/v7"
-          elif [[ "${{ matrix.architecture }}" = "aarch64" ]]; then
-            echo "::set-output name=platform::linux/arm64/v8"
-          else
-            echo "::error ::Could not determine platform for architecture ${{ matrix.architecture }}"
-            exit 1
-          fi
-        # yamllint enable rule:line-length
       - name: 🚀 Build
         uses: docker/build-push-action@v2
         with:
           push: false
-          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          context: ./rgdrive
           file: ./rgdrive/Dockerfile
-          cache-from: |
-            type=local,src=/tmp/.docker-cache
-            ghcr.io/troykelly/rclone-drive:edge
-          cache-to: type=local,mode=max,dest=/tmp/.docker-cache-new
-          platforms: ${{ steps.flags.outputs.platform }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+          platforms: linux/amd64,linux/386,linux/arm/v6,linux/arm/v7,linux/arm64/v8
           build-args: |
             BUILD_DATE=${{ steps.flags.outputs.date }}
             BUILD_DESCRIPTION=${{ needs.information.outputs.description }}
@@ -197,5 +175,5 @@ jobs:
       # https://github.com/moby/buildkit/issues/1896
       - name: 🚚 Swap build cache
         run: |
-          rm -rf /tmp/.docker-cache
-          mv /tmp/.docker-cache-new /tmp/.docker-cache
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
