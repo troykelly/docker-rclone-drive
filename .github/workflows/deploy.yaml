@@ -114,7 +114,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CI_PAT }}
-        
+
       - name: 🚀 Build
         uses: docker/build-push-action@v2
         with:
@@ -165,9 +165,9 @@ jobs:
           VCN_PASSWORD: ${{ secrets.VCN_PASSWORD }}
           VCN_NOTARIZATION_PASSWORD: ${{ secrets.VCN_NOTARIZATION_PASSWORD }}
           VCN_OTP_EMPTY: true
-
+      # yamllint disable rule:line-length
       # - name: 🚀 Push
-      #   # yamllint disable rule:line-length
+      #   
       #   run: |
       #     docker push \
       #       "ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
@@ -177,4 +177,4 @@ jobs:
       #       "troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
       #     docker push \
       #       "troykelly/rclone-drive:${{ steps.prepare.outputs.version }}"
-      #   # yamllint enable rule:line-length
+      # yamllint enable rule:line-length

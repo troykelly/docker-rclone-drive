@@ -169,7 +169,7 @@ jobs:
 
       - name: 🏗 Set up CodeNotary
         run: bash <(curl https://getvcn.codenotary.com -L)
-        
+
       - name: 🚀 Build
         uses: docker/build-push-action@v2
         with:
