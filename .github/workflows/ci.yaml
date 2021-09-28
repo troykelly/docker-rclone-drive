@@ -58,7 +58,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2
       - name: 🚀 Run Hadolint
-        uses: brpaz/hadolint-action@v1
+        uses: brpaz/hadolint-action@v1.5.0
         with:
           dockerfile: "./rgdrive/Dockerfile"
           ignore: "DL3003 DL3007"
@@ -90,7 +90,7 @@ jobs:
       - name: ⤵️ Check out code from GitHub
         uses: actions/checkout@v2
       - name: 🚀 Run Shellcheck
-        uses: ludeeus/action-shellcheck@1
+        uses: ludeeus/action-shellcheck@1.1.0
         env:
           SHELLCHECK_OPTS: -s bash
 
