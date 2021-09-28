@@ -27,6 +27,7 @@ jobs:
       - name: ℹ️ Gather version and environment
         id: information
         shell: bash
+        # yamllint disable rule:line-length
         run: |
           sha="${{ github.sha }}"
           environment="edge"
@@ -45,8 +46,8 @@ jobs:
           echo "::set-output name=version::${version}"
 
           echo "::set-output name=name::Drive rclone"
-          # yamllint disable-line rule:line-length
           echo "::set-output name=description::Provides a mount for a google drive folder"
+        # yamllint enable rule:line-length
 
   lint-hadolint:
     name: Hadolint
@@ -153,6 +154,7 @@ jobs:
         run: bash <(curl https://getvcn.codenotary.com -L)
       - name: ℹ️ Compose build flags
         id: flags
+        # yamllint disable rule:line-length
         run: |
           echo "::set-output name=date::$(date +"%Y-%m-%dT%H:%M:%SZ")"
 
@@ -167,10 +169,10 @@ jobs:
           elif [[ "${{ matrix.architecture }}" = "aarch64" ]]; then
             echo "::set-output name=platform::linux/arm64/v8"
           else
-            # yamllint disable-line rule:line-length
             echo "::error ::Could not determine platform for architecture ${{ matrix.architecture }}"
             exit 1
           fi
+        # yamllint enable rule:line-length
       - name: 🚀 Build
         uses: docker/build-push-action@v2
         with:
