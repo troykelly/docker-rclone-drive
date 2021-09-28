@@ -1,5 +1,8 @@
 FROM alpine:latest
 
+ARG TARGETOS
+ARG TARGETARCH
+
 ARG APP_USER=drive
 ARG APP_GROUP=drive
 ARG BUILD_RCLONE_PLATFORM=amd64
@@ -10,22 +13,10 @@ ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
-LABEL \
-    maintainer="Troy Kelly <troy@troykelly.com>" \
-    org.opencontainers.image.title="${BUILD_NAME}" \
-    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
-    org.opencontainers.image.vendor="Troy Kelly" \
-    org.opencontainers.image.authors="Troy Kelly <troy@troykelly.com>" \
-    org.opencontainers.image.licenses="Apache-2.0" \
-    org.opencontainers.image.url="https://troykelly" \
-    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
-    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
-    org.opencontainers.image.created=${BUILD_DATE} \
-    org.opencontainers.image.revision=${BUILD_REF} \
-    org.opencontainers.image.version=${BUILD_VERSION}
+COPY rootfs /
 
-
-WORKDIR /
+RUN echo Building for ${TARGETARCH}
+RUN echo Building os ${TARGETOS}
 
 RUN apk add --no-cache --update curl=7.79.1-r0 unzip=6.0-r9 fuse=2.9.9-r1 su-exec=0.2-r1 && \
  addgroup -g 1000 ${APP_GROUP} && \
@@ -50,3 +41,17 @@ RUN curl -O https://downloads.rclone.org/rclone-current-linux-${BUILD_RCLONE_PLA
 USER ${APP_USER}:${APP_GROUP}
 
 CMD ["/usr/sbin/mount.sh"]
+
+LABEL \
+    maintainer="Troy Kelly <troy@troykelly.com>" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.vendor="Troy Kelly" \
+    org.opencontainers.image.authors="Troy Kelly <troy@troykelly.com>" \
+    org.opencontainers.image.licenses="Apache-2.0" \
+    org.opencontainers.image.url="https://troykelly" \
+    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.revision=${BUILD_REF} \
+    org.opencontainers.image.version=${BUILD_VERSION}
