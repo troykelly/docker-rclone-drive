@@ -14,6 +14,7 @@ command: ["/usr/sbin/push.sh"]
 This readme is rubbish at the moment - sorry -
 the details below are not even current
 
+<!-- markdownlint-capture -->
 <!-- markdownlint-disable -->
 
 | Environment Variable  | Notes                                                        | Required |
@@ -43,4 +44,4 @@ the details below are not even current
 | GCRYPT_PASSWORD       | The password for encryption                                  | [ ]      |
 | GCRYPT_PASSWORD2      | The salt for the password                                    | [ ]      |
 
-<!-- markdownlint-restore -->
+<!-- markdownlint-enable -->
