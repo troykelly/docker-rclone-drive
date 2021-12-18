@@ -149,7 +149,7 @@ jobs:
         run: |
           if vcn authenticate \
             --output json \
-            "docker://ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.version }}" \
+            "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}" \
             | jq \
               --exit-status \
               '.verification.status != 0';
@@ -157,7 +157,7 @@ jobs:
             vcn login
             vcn notarize \
               --public \
-              "docker://ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.version }}"
+              "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
           fi
         # yamllint enable rule:line-length
         env:
@@ -172,9 +172,9 @@ jobs:
       #     docker push \
       #       "ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
       #     docker push \
-      #       "ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.version }}"
+      #       "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
       #     docker push \
       #       "troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
       #     docker push \
-      #       "troykelly/rclone-drive:${{ steps.prepare.outputs.version }}"
+      #       "troykelly/rclone-drive:sha-${{ steps.prepare.outputs.version }}"
       # yamllint enable rule:line-length
