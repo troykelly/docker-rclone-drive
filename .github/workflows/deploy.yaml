@@ -156,20 +156,20 @@ jobs:
       - name: 🪤 Get image
         # yamllint disable rule:line-length
         run: |
-          docker pull "ghcr.io/troykelly/rclone-drive:sha-${{ github.sha }}"
+          docker pull "ghcr.io/troykelly/rclone-drive:sha-${{ github.sha:0:7 }}"
         # yamllint enable rule:line-length
 
       - name: 🦠 Scan
         # yamllint disable rule:line-length
         run: |
-          docker scan --accept-license troykelly/rclone-drive:sha-${{ github.sha }}
+          docker scan --accept-license troykelly/rclone-drive:sha-${{ github.sha:0:7 }}
         # yamllint enable rule:line-length
 
       # - name: 🔏 Notarize
       # yamllint disable rule:line-length
       #   run: |
       #     cas login
-      #     cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ github.sha }}"
+      #     cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ github.sha:0:7 }}"
       #     cas logout
       # yamllint enable rule:line-length
       #   env:
@@ -178,5 +178,5 @@ jobs:
       - name: 🧹 Remove image
         # yamllint disable rule:line-length
         run: |
-          docker image rm "ghcr.io/troykelly/rclone-drive:sha-${{ github.sha }}"
+          docker image rm "ghcr.io/troykelly/rclone-drive:sha-${{ github.sha:0:7 }}"
         # yamllint enable rule:line-length
