@@ -147,24 +147,13 @@ jobs:
       - name: 🔏 Notarize
         # yamllint disable rule:line-length
         run: |
-          if vcn authenticate \
-            --output json \
-            "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}" \
-            | jq \
-              --exit-status \
-              '.verification.status != 0';
-          then
-            vcn login
-            vcn notarize \
-              --public \
-              "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
-          fi
+          bash <(curl https://getcas.codenotary.io -L)
+          cas login
+          cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
         # yamllint enable rule:line-length
         env:
-          VCN_USER: ${{ secrets.VCN_USER }}
-          VCN_PASSWORD: ${{ secrets.VCN_PASSWORD }}
-          VCN_NOTARIZATION_PASSWORD: ${{ secrets.VCN_NOTARIZATION_PASSWORD }}
-          VCN_OTP_EMPTY: true
+          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
+          SIGNER_ID: ${{ secrets.SIGNER_ID }}
         # yamllint disable rule:line-length
       # - name: 🚀 Push
       #
