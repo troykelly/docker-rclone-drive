@@ -162,7 +162,7 @@ jobs:
       - name: 🔏 Notarize
         # yamllint disable rule:line-length
         run: |
-          docker pull "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
+          docker pull "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
           cas login
           cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
           cas logout
