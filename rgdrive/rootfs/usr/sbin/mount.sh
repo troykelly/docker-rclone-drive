@@ -120,7 +120,7 @@ _term() {
 
 trap _term SIGTERM
 
-fusermount -u /mount${DRIVE_MOUNTFOLDER} || true
+fusermount -uz /mount${DRIVE_MOUNTFOLDER} || true
 mkdir -vp "/mount${DRIVE_MOUNTFOLDER}" || true
 RCLONELSDTEST="${RCLONE} ${DRIVE_IMPERSONATE} lsd -v --config ${RCLONE_CONFIG} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
 echo "Running: ${RCLONELSDTEST}"
@@ -135,7 +135,7 @@ do
   echo "${CHILD_RCLONE}" > ${RCLONE_PID_FILE}
   echo "💾 Ready (${CHILD_RCLONE})."
   wait "$CHILD_RCLONE"
-  fusermount -u /mount${DRIVE_MOUNTFOLDER} &
+  fusermount -uz /mount${DRIVE_MOUNTFOLDER} &
   CHILD_UNMOUNT=$!
   echo "${CHILD_UNMOUNT}" > ${RCLONE_PID_FILE}
   echo "🛑 Unmounting."
