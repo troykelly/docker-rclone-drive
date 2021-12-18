@@ -23,6 +23,7 @@ jobs:
     name: ℹ️ Gather add-on information
     runs-on: ubuntu-latest
     outputs:
+      containersha: ${{ steps.information.outputs.containersha }}
       description: ${{ steps.information.outputs.description }}
       environment: ${{ steps.information.outputs.environment }}
       name: ${{ steps.information.outputs.name }}
@@ -38,6 +39,7 @@ jobs:
           sha="${{ github.sha }}"
           environment="edge"
           version="${sha:0:7}"
+          echo "::set-output name=containersha::${version}"
           if [[ "${{ github.event_name }}" = "release" ]]; then
             version="${{ github.event.release.tag_name }}"
             version="${version,,}"
@@ -156,20 +158,20 @@ jobs:
       - name: 🪤 Get image
         # yamllint disable rule:line-length
         run: |
-          docker pull "ghcr.io/troykelly/rclone-drive:sha-${{ github.sha:0:7 }}"
+          docker pull "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.containersha }}"
         # yamllint enable rule:line-length
 
       - name: 🦠 Scan
         # yamllint disable rule:line-length
         run: |
-          docker scan --accept-license troykelly/rclone-drive:sha-${{ github.sha:0:7 }}
+          docker scan --accept-license troykelly/rclone-drive:sha-${{ needs.information.outputs.containersha }}
         # yamllint enable rule:line-length
 
       # - name: 🔏 Notarize
       # yamllint disable rule:line-length
       #   run: |
       #     cas login
-      #     cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ github.sha:0:7 }}"
+      #     cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.containersha }}"
       #     cas logout
       # yamllint enable rule:line-length
       #   env:
@@ -178,5 +180,5 @@ jobs:
       - name: 🧹 Remove image
         # yamllint disable rule:line-length
         run: |
-          docker image rm "ghcr.io/troykelly/rclone-drive:sha-${{ github.sha:0:7 }}"
+          docker image rm "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.containersha }}"
         # yamllint enable rule:line-length
