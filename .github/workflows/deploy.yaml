@@ -165,16 +165,16 @@ jobs:
           docker scan --accept-license troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}
         # yamllint enable rule:line-length
 
-      - name: 🔏 Notarize
-        # yamllint disable rule:line-length
-        run: |
-          cas login
-          cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
-          cas logout
-        # yamllint enable rule:line-length
-        env:
-          CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
-          SIGNER_ID: ${{ secrets.SIGNER_ID }}
+      # - name: 🔏 Notarize
+      #   # yamllint disable rule:line-length
+      #   run: |
+      #     cas login
+      #     cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
+      #     cas logout
+      #   # yamllint enable rule:line-length
+      #   env:
+      #     CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
+      #     SIGNER_ID: ${{ secrets.SIGNER_ID }}
 
       - name: 🧹 Remove image
         # yamllint disable rule:line-length
