@@ -144,12 +144,19 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+      - name: 🦠 Scan
+        # yamllint disable rule:line-length
+        run: |
+          docker scan --accept-license --version
+          docker scan troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}
+        # yamllint enable rule:line-length
+
       - name: 🔏 Notarize
         # yamllint disable rule:line-length
         run: |
           bash <(curl https://getcas.codenotary.io -L)
           cas login
-          cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
+          cas notarize --bom "docker://troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
         # yamllint enable rule:line-length
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
