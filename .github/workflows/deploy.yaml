@@ -145,9 +145,11 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: 🦠 Scan
+        # yamllint disable rule:line-length
         run: |
           docker scan --accept-license --version
           docker scan troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}
+        # yamllint enable rule:line-length
 
       - name: 🔏 Notarize
         # yamllint disable rule:line-length
