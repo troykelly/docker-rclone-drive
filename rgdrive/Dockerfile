@@ -15,7 +15,7 @@ ARG BUILD_VERSION
 
 COPY rootfs /
 
-RUN apk add --no-cache --update curl=7.79.1-r0 unzip=6.0-r9 fuse=2.9.9-r1 su-exec=0.2-r1 libarchive-tools=3.5.1-r0 && \
+RUN apk add --no-cache --update curl=7.80.0-r0 unzip=6.0-r9 fuse=2.9.9-r1 su-exec=0.2-r1 libarchive-tools=3.5.2-r0 && \
  addgroup -g 1000 ${APP_GROUP} && \
  adduser -D -h /home/${APP_USER} -s /sbin/nologin -u 1000 -G ${APP_GROUP} ${APP_USER} && \
  mkdir -p /mount /home/${APP_USER}/.config/rclone && \
