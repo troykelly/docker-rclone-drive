@@ -153,6 +153,12 @@ jobs:
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
+      - name: 🪤 Get image
+        # yamllint disable rule:line-length
+        run: |
+          docker pull "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
+        # yamllint enable rule:line-length
+
       - name: 🦠 Scan
         # yamllint disable rule:line-length
         run: |
@@ -162,7 +168,6 @@ jobs:
       - name: 🔏 Notarize
         # yamllint disable rule:line-length
         run: |
-          docker pull "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
           cas login
           cas notarize --bom "docker://ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
           cas logout
@@ -170,16 +175,9 @@ jobs:
         env:
           CAS_API_KEY: ${{ secrets.CAS_API_KEY }}
           SIGNER_ID: ${{ secrets.SIGNER_ID }}
+
+      - name: 🧹 Remove image
         # yamllint disable rule:line-length
-      # - name: 🚀 Push
-      #
-      #   run:
-      #     docker push \
-      #       "ghcr.io/troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
-      #     docker push \
-      #       "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
-      #     docker push \
-      #       "troykelly/rclone-drive:${{ needs.information.outputs.environment }}"
-      #     docker push \
-      #       "troykelly/rclone-drive:sha-${{ steps.prepare.outputs.version }}"
-      # yamllint enable rule:line-length
+        run: |
+          docker image rm "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
+        # yamllint enable rule:line-length
