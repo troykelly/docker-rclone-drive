@@ -154,8 +154,10 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: 🪤 Get image
+        # yamllint disable rule:line-length
         run: |
           docker pull "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
+        # yamllint enable rule:line-length
 
       - name: 🦠 Scan
         # yamllint disable rule:line-length
@@ -175,5 +177,7 @@ jobs:
           SIGNER_ID: ${{ secrets.SIGNER_ID }}
 
       - name: 🧹 Remove image
+        # yamllint disable rule:line-length
         run: |
           docker image rm "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.version }}"
+        # yamllint enable rule:line-length
