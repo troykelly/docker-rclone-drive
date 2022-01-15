@@ -110,8 +110,8 @@ jobs:
         with:
           install: true
 
-      - name: 🏗 Set up CodeNotary
-        run: bash <(curl https://getcas.codenotary.io -L)
+      # - name: 🏗 Set up CodeNotary
+      #   run: bash <(curl https://getcas.codenotary.io -L)
 
       - name: 🏗  Login to Docker Container Registry
         uses: docker/login-action@v1
