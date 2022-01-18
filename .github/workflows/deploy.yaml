@@ -161,11 +161,11 @@ jobs:
           docker pull "ghcr.io/troykelly/rclone-drive:sha-${{ needs.information.outputs.containersha }}"
         # yamllint enable rule:line-length
 
-      - name: 🦠 Scan
-        # yamllint disable rule:line-length
-        run: |
-          docker scan --accept-license troykelly/rclone-drive:sha-${{ needs.information.outputs.containersha }}
-        # yamllint enable rule:line-length
+      # - name: 🦠 Scan
+      #   # yamllint disable rule:line-length
+      #   run: |
+      #     docker scan --accept-license troykelly/rclone-drive:sha-${{ needs.information.outputs.containersha }}
+      #   # yamllint enable rule:line-length
 
       # - name: 🔏 Notarize
       # yamllint disable rule:line-length
