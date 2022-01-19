@@ -19,6 +19,10 @@ if [ -z "${RCLONE_CRYPT_STORE}" ]; then
   RCLONE_CRYPT_STORE=gcrypt
 fi
 
+if [ -z "${RCLONE_LOG_LEVEL}" ]; then
+  RCLONE_LOG_LEVEL=NOTICE
+fi
+
 if [ -z "${DRIVE_TARGETFOLDER}" ]; then
   DRIVE_TARGETFOLDER=
 fi
@@ -125,16 +129,18 @@ mkdir -vp "/mount${DRIVE_MOUNTFOLDER}" || true
 # RCLONELSDTEST="${RCLONE} ${DRIVE_IMPERSONATE} lsd -v --config ${RCLONE_CONFIG} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
 # echo "Running: ${RCLONELSDTEST}"
 # ${RCLONELSDTEST}
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_VFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_VFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
+RCLONECMD="${RCLONE} --log-level ${RCLONE_LOG_LEVEL} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} mount --config ${RCLONE_CONFIG} --allow-non-empty --vfs-cache-mode ${RCLONE_VFS_CACHE_MODE} --buffer-size ${RCLONE_BUFFER_SIZE} --vfs-read-ahead ${RCLONE_VFS_READ_AHEAD} ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} /mount${DRIVE_MOUNTFOLDER}"
 while :
 do
   echo "🔌 Mounting ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} at /mount${DRIVE_MOUNTFOLDER}"
   # shellcheck disable=SC2086
   nice -n 20 ${RCLONECMD} &
   CHILD_RCLONE=$! 
-  echo "⏳ Waiting (${CHILD_RCLONE})."
   sleep 5
-  ls -al "/mount${DRIVE_MOUNTFOLDER}"
+  ls -al "/mount${DRIVE_MOUNTFOLDER}/" > /dev/null 2>&1 &
+  CHILD_LS=$!
+  echo "⏳ Waiting (${CHILD_LS})."
+  wait "${CHILD_LS}"
   echo "${CHILD_RCLONE}" > ${RCLONE_PID_FILE}
   echo "💾 Ready (${CHILD_RCLONE})."
   wait "$CHILD_RCLONE"
