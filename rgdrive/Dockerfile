@@ -20,8 +20,8 @@ RUN apk add --no-cache --update curl=7.80.0-r0 unzip=6.0-r9 fuse=2.9.9-r1 su-exe
  adduser -D -h /home/${APP_USER} -s /sbin/nologin -u 1000 -G ${APP_GROUP} ${APP_USER} && \
  mkdir -p /mount /home/${APP_USER}/.config/rclone && \
  chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER} && \
- chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh &&\
- chgrp -R ${APP_GROUP} /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh
+ chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh && \
+ chgrp -R ${APP_GROUP} /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh
 
 WORKDIR /home/${APP_USER}
 
@@ -38,9 +38,6 @@ RUN if [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ] ;\
  /usr/bin/rclone version --check
 
 USER ${APP_USER}:${APP_GROUP}
-
-ARG RCLONE_PID_FILE=/tmp/rclone.pid
-ENV RCLONE_PID_FILE=${RCLONE_PID_FILE}
 
 HEALTHCHECK --interval=30s \
     --timeout=30s \
