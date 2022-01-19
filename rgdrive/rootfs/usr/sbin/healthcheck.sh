@@ -8,7 +8,7 @@ if [[ ! -f "$RCLONE_PID_FILE" ]]; then
     exit 1
 fi
 
-PID=$(<$RCLONE_PID_FILE)
+PID=$(cat $RCLONE_PID_FILE)
 
 if [ -z "${PID}" ]; then
     exit 2
