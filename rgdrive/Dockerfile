@@ -39,6 +39,15 @@ RUN if [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ] ;\
 
 USER ${APP_USER}:${APP_GROUP}
 
+ARG RCLONE_PID_FILE=/tmp/rclone.pid
+ENV RCLONE_PID_FILE=${RCLONE_PID_FILE}
+
+HEALTHCHECK --interval=30s \
+    --timeout=30s \
+    --start-period=4m \
+    --retries=3 \
+    CMD /usr/sbin/healthcheck.sh
+
 CMD ["/usr/sbin/mount.sh"]
 
 LABEL \
