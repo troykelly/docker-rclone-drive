@@ -14,7 +14,7 @@ if [ -z "${PID}" ]; then
     exit 2
 fi
 
-kill ${PID} > /dev/null 2>&1
+kill "${PID}" > /dev/null 2>&1
 KILL_EXIT_CODE=$?
 
 if [ $KILL_EXIT_CODE -ne 0 ]; then
