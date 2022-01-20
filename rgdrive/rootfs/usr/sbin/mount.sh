@@ -90,6 +90,10 @@ if ! "${GENERATE_CONFIG}"; then
   echo "Failed to generate configuration file."
   exit 4
 fi
+if [ ! -f "${RCLONE_CONFIG}" ]; then
+  echo "Configuration generation incomplete or failed."
+  exit 5
+fi
 
 if [ "$FORCE_NO_CRYPT" == "true" ]; then
   RCLONE_MOUNT_POINT=${RCLONE_PRIMARY_STORE}
