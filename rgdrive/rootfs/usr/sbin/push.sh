@@ -27,6 +27,10 @@ if [ -z "${RCLONE_PID_FILE}" ]; then
   RCLONE_PID_FILE=/tmp/rclone.pid
 fi
 
+if [ -z "${RCLONE_LOG_LEVEL}" ]; then
+  RCLONE_LOG_LEVEL=ERROR
+fi
+
 if [ -z "${FORCE_NO_CRYPT}" ]; then
   FORCE_NO_CRYPT=false
 fi
@@ -105,7 +109,7 @@ sleep 30
 trap _term SIGTERM
 
 KEEP_RUNNING=true
-RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER}"
+RCLONECMD="${RCLONE} ${DRIVE_IMPERSONATE} --bwlimit ${BANDWIDTH_EGRESS}:${BANDWIDTH_INGRESS} move --config ${RCLONE_CONFIG} --delete-after -v --stats 60s /upload ${RCLONE_MOUNT_POINT}:${DRIVE_TARGETFOLDER} --log-level ${RCLONE_LOG_LEVEL}"
 while :
 do
   # shellcheck disable=SC2086

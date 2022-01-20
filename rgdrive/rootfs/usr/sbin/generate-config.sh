@@ -37,6 +37,10 @@ if [ -z "${RCLONE_CRYPT_STORE}" ]; then
   RCLONE_CRYPT_STORE=gcrypt
 fi
 
+if [ -z "${RCLONE_LOG_LEVEL}" ]; then
+  RCLONE_LOG_LEVEL=ERROR
+fi
+
 if [ -z "${SHARE_UID}" ]; then
   SHARE_UID=1000
 fi
@@ -135,6 +139,7 @@ else
 fi
 
 echo "📝 Generating configuration in ${RCLONE_CONFIG}"
+touch "${RCLONE_CONFIG}"
 touch "${RCLONE_CONFIG_LOG}"
 
 if [ -n "${DRIVE_IMPERSONATE}" ]; then
@@ -149,7 +154,7 @@ if [ "$FORCE_NO_CRYPT" == "true" ]; then
 fi
 
 if [ -n "${RCLONE_TOKEN}" ]; then
-  "${RCLONE}" config create --non-interactive --quiet --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id="${GOOGLE_CLIENTID}" client_secret="${GOOGLE_CLIENTSECRET}" scope=drive root_folder_id="${RCLONE_ROOT_FOLDER_ID}" team_drive="${RCLONE_TEAM_DRIVE}" config_team_drive="${RCLONE_TEAM_DRIVE}" use_trash=false skip_gdocs=true chunk_size=32M token="${RCLONE_TOKEN}" config_refresh_token=false config_change_team_drive="${RCLONE_TEAMDRIVE}" >> "${RCLONE_CONFIG_LOG}" 2>&1
+  "${RCLONE}" config create --non-interactive --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id="${GOOGLE_CLIENTID}" client_secret="${GOOGLE_CLIENTSECRET}" scope=drive root_folder_id="${RCLONE_ROOT_FOLDER_ID}" team_drive="${RCLONE_TEAM_DRIVE}" config_team_drive="${RCLONE_TEAM_DRIVE}" use_trash=false skip_gdocs=true chunk_size=32M token="${RCLONE_TOKEN}" config_refresh_token=false config_change_team_drive="${RCLONE_TEAMDRIVE}" >> "${RCLONE_CONFIG_LOG}" 2>&1
 else
   cat << EOF > "${SERVICE_ACCOUNT_FILE}"
 {
@@ -166,18 +171,29 @@ else
 }
 EOF
 
-  "${RCLONE}" config create --non-interactive --quiet --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id="${GOOGLE_CLIENTID}" client_secret="${GOOGLE_CLIENTSECRET}" scope=drive root_folder_id="${RCLONE_ROOT_FOLDER_ID}" team_drive="${RCLONE_TEAM_DRIVE}" config_team_drive="${RCLONE_TEAM_DRIVE}" use_trash=false skip_gdocs=true chunk_size=32M service_account_file="${SERVICE_ACCOUNT_FILE}" config_change_team_drive="${RCLONE_TEAMDRIVE}" >> "${RCLONE_CONFIG_LOG}" 2>&1
+  "${RCLONE}" config create --non-interactive --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id="${GOOGLE_CLIENTID}" client_secret="${GOOGLE_CLIENTSECRET}" scope=drive root_folder_id="${RCLONE_ROOT_FOLDER_ID}" team_drive="${RCLONE_TEAM_DRIVE}" config_team_drive="${RCLONE_TEAM_DRIVE}" use_trash=false skip_gdocs=true chunk_size=32M service_account_file="${SERVICE_ACCOUNT_FILE}" config_change_team_drive="${RCLONE_TEAMDRIVE}" >> "${RCLONE_CONFIG_LOG}" 2>&1
 fi
 
 if [ "$RCLONE_CACHE" == "true" ]; then
-  "${RCLONE}" config create --non-interactive --quiet --config "${RCLONE_CONFIG}" "${RCLONE_CACHE_STORE}" cache remote="${RCLONE_PRIMARY_STORE}:" chunk_size=10M info_age=1d chunk_total_size=1G >> "${RCLONE_CONFIG_LOG}" 2>&1
+  "${RCLONE}" config create --non-interactive --config "${RCLONE_CONFIG}" "${RCLONE_CACHE_STORE}" cache remote="${RCLONE_PRIMARY_STORE}:" chunk_size=10M info_age=1d chunk_total_size=1G >> "${RCLONE_CONFIG_LOG}" 2>&1
   CRYPT_MOUNT_POINT=${RCLONE_CACHE_STORE}:
 else
   CRYPT_MOUNT_POINT=${RCLONE_PRIMARY_STORE}:
 fi
 
 if [ "$FORCE_NO_CRYPT" != "true" ]; then
-  "${RCLONE}" config create --non-interactive --quiet --config "${RCLONE_CONFIG}" --obscure "${RCLONE_CRYPT_STORE}" crypt remote="${CRYPT_MOUNT_POINT}" filename_encryption=standard directory_name_encryption=true password="${GCRYPT_PASSWORD}" password2="${GCRYPT_PASSWORD2}" >> "${RCLONE_CONFIG_LOG}" 2>&1
+  "${RCLONE}" config create --non-interactive --config "${RCLONE_CONFIG}" --obscure "${RCLONE_CRYPT_STORE}" crypt remote="${CRYPT_MOUNT_POINT}" filename_encryption=standard directory_name_encryption=true password="${GCRYPT_PASSWORD}" password2="${GCRYPT_PASSWORD2}" >> "${RCLONE_CONFIG_LOG}" 2>&1
+fi
+
+if [ "${RCLONE_LOG_LEVEL}" == "DEBUG" ]; then
+  FILESIZE=$(stat -c%s "$RCLONE_CONFIG")
+  echo "===== START LOG ====="
+  cat "${RCLONE_CONFIG_LOG}"
+  echo "=====  END LOG  ====="
+  echo "===== START CONFIG ====="
+  echo "# ${FILESIZE} bytes in ${RCLONE_CONFIG}"
+  cat "${RCLONE_CONFIG}"
+  echo "=====  END CONFIG  ====="
 fi
 
 echo "📄 Config created."

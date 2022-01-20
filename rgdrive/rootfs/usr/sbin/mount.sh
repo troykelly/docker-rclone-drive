@@ -20,7 +20,7 @@ if [ -z "${RCLONE_CRYPT_STORE}" ]; then
 fi
 
 if [ -z "${RCLONE_LOG_LEVEL}" ]; then
-  RCLONE_LOG_LEVEL=NOTICE
+  RCLONE_LOG_LEVEL=ERROR
 fi
 
 if [ -z "${DRIVE_TARGETFOLDER}" ]; then
