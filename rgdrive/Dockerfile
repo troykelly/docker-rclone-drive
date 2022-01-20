@@ -7,16 +7,18 @@ ARG TARGETVARIANT=
 ARG APP_USER=drive
 ARG APP_GROUP=drive
 ARG BUILD_DESCRIPTION="Access an encrypted google drive"
-ARG BUILD_NAME="RClone Mount Google Drive"
+ARG RCLONE_VERSION=1.56.2
+ARG BUILD_NAME="RClone v${RCLONE_VERSION} Mount Google Drive"
 ARG BUILD_DATE
 ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
-ARG RCLONE_VERSION=1.56.2
+
 
 COPY rootfs /
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates=20210119~20.04.2 \
     curl=7.68.0-1ubuntu2.7 \
     fuse=2.9.9-3 \
     libarchive-tools=3.4.0-2ubuntu1 \
