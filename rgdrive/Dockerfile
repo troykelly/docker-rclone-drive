@@ -22,8 +22,8 @@ RUN apt-get update && apt-get install -y \
   unzip=6.0-25ubuntu1 \
   && rm -rf /var/lib/apt/lists/*
 
-RUN addgroup -g 1000 ${APP_GROUP} && \
- adduser -D -h /home/${APP_USER} -s /sbin/nologin -u 1000 -G ${APP_GROUP} ${APP_USER} && \
+RUN addgroup --gid 1000 ${APP_GROUP} && \
+ adduser --disabled-login --home /home/${APP_USER} --shell /sbin/nologin --uid 1000 --ingroup ${APP_GROUP} --gecos "${APP_USER},,,,Script User" ${APP_USER} && \
  mkdir -p /mount /home/${APP_USER}/.config/rclone && \
  chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER} && \
  chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh && \
