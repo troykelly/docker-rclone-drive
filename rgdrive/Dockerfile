@@ -7,8 +7,8 @@ ARG TARGETVARIANT=
 ARG APP_USER=drive
 ARG APP_GROUP=drive
 ARG BUILD_DESCRIPTION="Access an encrypted google drive"
-ARG RCLONE_VERSION=1.56.2
-ARG BUILD_NAME="RClone v${RCLONE_VERSION} Mount Google Drive"
+ARG RCLONE_VERSION=v1.56.2
+ARG BUILD_NAME="RClone ${RCLONE_VERSION} Mount Google Drive"
 ARG BUILD_DATE
 ARG BUILD_REF
 ARG BUILD_REPOSITORY
@@ -34,8 +34,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
 WORKDIR /home/${APP_USER}
 
 RUN if [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ] ;\
-    then curl -L https://downloads.rclone.org/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}-${TARGETVARIANT}.zip -o rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ;\
-    else curl -L https://downloads.rclone.org/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip  -o rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ; fi && \
+    then curl -L https://downloads.rclone.org/${RCLONE_VERSION}/rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}-${TARGETVARIANT}.zip -o rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ;\
+    else curl -L https://downloads.rclone.org/${RCLONE_VERSION}/rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip  -o rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ; fi && \
  mkdir rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH} && \
  cd rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH} && \
  bsdtar -xf ../rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip -s'|[^/]*/||' && \
