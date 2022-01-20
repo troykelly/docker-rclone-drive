@@ -7,16 +7,15 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-alpine-${VARIANT}
 
 # ** [Optional] Uncomment this section to install additional packages. **
 RUN apk update \
-    && apk add --no-cache curl unzip fuse su-exec
+    && apk add --no-cache curl unzip fuse su-exec bash vim
 
 RUN cd ~ && \
- bash <(curl https://getcas.codenotary.io -L) && \
- curl -O https://downloads.rclone.org/rclone-current-linux-amd64.zip && \
- unzip rclone-current-linux-amd64.zip && \
- cd rclone-*-linux-amd64 && \
- cp rclone /usr/bin/ && \
- chmod 755 /usr/bin/rclone && \
- cd ~ && \
- rm -Rf ./rclone* && \
- mkdir -p /mount && \
- chown -R vscode:vscode /mount
+    curl -LO https://downloads.rclone.org/rclone-current-linux-amd64.zip && \
+    unzip rclone-current-linux-amd64.zip && \
+    cd rclone-*-linux-amd64 && \
+    cp rclone /usr/bin/ && \
+    chmod 755 /usr/bin/rclone && \
+    cd ~ && \
+    rm -Rf ./rclone* && \
+    mkdir -p /mount && \
+    chown -R vscode:vscode /mount
