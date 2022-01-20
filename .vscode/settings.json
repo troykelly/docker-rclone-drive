@@ -1,5 +1,6 @@
 {
     "yaml.schemas": {
         "https://json.schemastore.org/github-workflow.json": "file:///workspaces/docker-rclone-drive/.github/workflows/deploy.yaml"
-    }
+    },
+    "files.eol": "\n",
 }
