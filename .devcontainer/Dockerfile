@@ -7,7 +7,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:0-alpine-${VARIANT}
 
 # ** [Optional] Uncomment this section to install additional packages. **
 RUN apk update \
-    && apk add --no-cache curl unzip fuse su-exec bash vim
+    && apk add --no-cache curl unzip fuse su-exec bash vim findmnt
 
 RUN cd ~ && \
     curl -LO https://downloads.rclone.org/rclone-current-linux-amd64.zip && \
