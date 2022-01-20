@@ -7,36 +7,38 @@ ARG TARGETVARIANT=
 ARG APP_USER=drive
 ARG APP_GROUP=drive
 ARG BUILD_DESCRIPTION="Access an encrypted google drive"
-ARG BUILD_NAME="RClone Mount Google Drive"
+ARG INSTALL_RCLONE_VERSION=1.56.2
+ARG BUILD_NAME="RClone v${INSTALL_RCLONE_VERSION} Mount Google Drive"
 ARG BUILD_DATE
 ARG BUILD_REF
 ARG BUILD_REPOSITORY
 ARG BUILD_VERSION
 
+
 COPY rootfs /
 
-RUN apt-get update && apt-get install -y \
-  curl=7.68.0-1ubuntu2.7 \
-  fuse=2.9.9-3 \
-  libarchive-tools=3.4.0-2ubuntu1 \
-  unzip=6.0-25ubuntu1 \
-  && rm -rf /var/lib/apt/lists/*
-
-RUN addgroup --gid 1000 ${APP_GROUP} && \
- adduser --disabled-login --home /home/${APP_USER} --shell /sbin/nologin --uid 1000 --ingroup ${APP_GROUP} --gecos "${APP_USER},,,,Script User" ${APP_USER} && \
- mkdir -p /mount /home/${APP_USER}/.config/rclone && \
- chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER} && \
- chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh && \
- chgrp -R ${APP_GROUP} /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    ca-certificates=20210119~20.04.2 \
+    curl=7.68.0-1ubuntu2.7 \
+    fuse=2.9.9-3 \
+    libarchive-tools=3.4.0-2ubuntu1 \
+    unzip=6.0-25ubuntu1 && \
+    rm -rf /var/lib/apt/lists/* && \
+    addgroup --gid 1000 ${APP_GROUP} && \
+    adduser --disabled-login --home /home/${APP_USER} --shell /sbin/nologin --uid 1000 --ingroup ${APP_GROUP} --gecos "${APP_USER},,,,Script User" ${APP_USER} && \
+    mkdir -p /mount /home/${APP_USER}/.config/rclone && \
+    chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER} && \
+    chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh && \
+    chgrp -R ${APP_GROUP} /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh
 
 WORKDIR /home/${APP_USER}
 
 RUN if [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ] ;\
-    then curl -L https://downloads.rclone.org/rclone-current-${TARGETOS}-${TARGETARCH}-${TARGETVARIANT}.zip -o rclone-current-${TARGETOS}-${TARGETARCH}.zip ;\
-    else curl -LO https://downloads.rclone.org/rclone-current-${TARGETOS}-${TARGETARCH}.zip ; fi && \
- mkdir rclone-current-${TARGETOS}-${TARGETARCH} && \
- cd rclone-current-${TARGETOS}-${TARGETARCH} && \
- bsdtar -xf ../rclone-current-${TARGETOS}-${TARGETARCH}.zip -s'|[^/]*/||' && \
+    then curl -L https://downloads.rclone.org/v${INSTALL_RCLONE_VERSION}/rclone-v${INSTALL_RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}-${TARGETVARIANT}.zip -o rclone-${INSTALL_RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ;\
+    else curl -L https://downloads.rclone.org/v${INSTALL_RCLONE_VERSION}/rclone-v${INSTALL_RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip  -o rclone-${INSTALL_RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ; fi && \
+ mkdir rclone-${INSTALL_RCLONE_VERSION}-${TARGETOS}-${TARGETARCH} && \
+ cd rclone-${INSTALL_RCLONE_VERSION}-${TARGETOS}-${TARGETARCH} && \
+ bsdtar -xf ../rclone-${INSTALL_RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip -s'|[^/]*/||' && \
  cp rclone /usr/bin/ && \
  chmod 755 /usr/bin/rclone && \
  cd .. && \
