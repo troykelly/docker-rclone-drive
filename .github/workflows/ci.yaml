@@ -60,7 +60,7 @@ jobs:
       - name: 🚀 Run Hadolint
         uses: brpaz/hadolint-action@v1.5.0
         with:
-          dockerfile: "./rgdrive/Dockerfile"
+          dockerfile: "./rgdrive/Dockerfile.alpine"
           ignore: "DL3003 DL3007"
 
   lint-json:
@@ -182,7 +182,7 @@ jobs:
           push: false
           builder: ${{ steps.buildx.outputs.name }}
           context: ./rgdrive
-          file: ./rgdrive/Dockerfile
+          file: ./rgdrive/Dockerfile.alpine
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache

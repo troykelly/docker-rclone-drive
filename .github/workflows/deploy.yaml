@@ -129,7 +129,7 @@ jobs:
           push: true
           builder: ${{ steps.buildx.outputs.name }}
           context: ./rgdrive
-          file: ./rgdrive/Dockerfile
+          file: ./rgdrive/Dockerfile.alpine
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=local,src=/tmp/.buildx-cache
