@@ -140,11 +140,8 @@ do
   # shellcheck disable=SC2086
   nice -n 20 ${RCLONECMD} &
   CHILD_RCLONE=$! 
-  sleep 5
-  ls -al "/mount${DRIVE_MOUNTFOLDER}/" > /dev/null 2>&1 &
-  CHILD_LS=$!
-  echo "⏳ Waiting (${CHILD_LS})."
-  wait "${CHILD_LS}"
+  echo "⏳ Waiting for rclone to mount."
+  until findmnt --mountpoint "/mount${DRIVE_MOUNTFOLDER}" --mtab >/dev/null; do :; done
   echo "${CHILD_RCLONE}" > ${RCLONE_PID_FILE}
   echo "💾 Ready (${CHILD_RCLONE})."
   wait "$CHILD_RCLONE"
