@@ -17,7 +17,7 @@ ARG BUILD_VERSION
 
 COPY rootfs /
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates=20210119~20.04.2 \
     curl=7.68.0-1ubuntu2.7 \
     fuse=2.9.9-3 \
@@ -34,11 +34,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /home/${APP_USER}
 
 RUN if [ "$TARGETARCH" = "arm" ] && [ "$TARGETVARIANT" = "v7" ] ;\
-    then curl -L https://downloads.rclone.org/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}-${TARGETVARIANT}.zip -o rclone-current-${TARGETOS}-${TARGETARCH}.zip ;\
-    else curl -LO https://downloads.rclone.org/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ; fi && \
- mkdir rclone-current-${TARGETOS}-${TARGETARCH} && \
- cd rclone-current-${TARGETOS}-${TARGETARCH} && \
- bsdtar -xf ../rclone-current-${TARGETOS}-${TARGETARCH}.zip -s'|[^/]*/||' && \
+    then curl -L https://downloads.rclone.org/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}-${TARGETVARIANT}.zip -o rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ;\
+    else curl -L https://downloads.rclone.org/v${RCLONE_VERSION}/rclone-v${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip  -o rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip ; fi && \
+ mkdir rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH} && \
+ cd rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH} && \
+ bsdtar -xf ../rclone-${RCLONE_VERSION}-${TARGETOS}-${TARGETARCH}.zip -s'|[^/]*/||' && \
  cp rclone /usr/bin/ && \
  chmod 755 /usr/bin/rclone && \
  cd .. && \
