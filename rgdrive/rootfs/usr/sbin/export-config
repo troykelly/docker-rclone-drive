@@ -56,5 +56,5 @@ mkdir -p "${EXPORT_DIR}"
 rm -f "${EXPORT_FILE}"
 # shellcheck disable=SC2027,SC2086
 tar zcf "${EXPORT_FILE}" -C "${RCLONE_CONFIG_DIR}" "$(basename ""${RCLONE_CONFIG}"")" -C "${SERVICE_ACCOUNT_DIR}" "$(basename ""${SERVICE_ACCOUNT_FILE}"")" -C "$(dirname ""${RCLONE_CONFIG_LOG}"")" "$(basename ""${RCLONE_CONFIG_LOG}"")"
-# shellcheck enable=SC2027,SC2086
+
 echo "⌛️ Export complete. Saved as ${EXPORT_FILE}"
