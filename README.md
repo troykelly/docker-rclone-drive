@@ -8,7 +8,7 @@ You can either mount a Google Drive, or
 Push all the files in a path to a Google Drive (hint)
 
 ```yaml
-command: ["/usr/sbin/push.sh"]
+command: ["/usr/sbin/push"]
 ```
 
 This readme is rubbish at the moment - sorry -

@@ -30,11 +30,11 @@ if [ -z "${RCLONE_PRIMARY_STORE}" ]; then
 fi
 
 if [ -z "${RCLONE_CACHE_STORE}" ]; then
-  RCLONE_CACHE_STORE=gcache
+  RCLONE_CACHE_STORE=${RCLONE_PRIMARY_STORE}-cache
 fi
 
 if [ -z "${RCLONE_CRYPT_STORE}" ]; then
-  RCLONE_CRYPT_STORE=gcrypt
+  RCLONE_CRYPT_STORE=${RCLONE_PRIMARY_STORE}-crypt
 fi
 
 if [ -z "${RCLONE_LOG_LEVEL}" ]; then
@@ -56,7 +56,7 @@ else
 fi
 
 if [ -z "${SERVICE_ACCOUNT_FILE}" ]; then
-  SERVICE_ACCOUNT_FILE="${RCLONE_CONFIG_DIR}/sa.conf"
+  SERVICE_ACCOUNT_FILE="${RCLONE_CONFIG_DIR}/sa-${RCLONE_PRIMARY_STORE}.conf"
 fi
 
 if [ -z "${FORCE_NO_CRYPT}" ]; then
@@ -65,10 +65,7 @@ fi
 
 mkdir -p "${RCLONE_CONFIG_DIR}"
 
-# Remove old configuration
-if [ -f "${RCLONE_CONFIG}" ]; then
-  rm -Rf "${RCLONE_CONFIG}"
-fi
+# Remove old files
 if [ -f "${SERVICE_ACCOUNT_FILE}" ]; then
   rm -Rf "${SERVICE_ACCOUNT_FILE}"
 fi

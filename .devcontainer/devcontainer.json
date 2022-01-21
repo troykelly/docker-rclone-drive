@@ -16,8 +16,9 @@
   "extensions": ["redhat.vscode-yaml"],
   "containerEnv": {
     "RCLONE_CONFIG_DIR": "${containerWorkspaceFolder}/.config",
+    "EXPORT_DIR": "${containerWorkspaceFolder}/.export",
     "RCLONE_CONFIG": "${containerWorkspaceFolder}/.config/rclone.conf",
-    "GENERATE_CONFIG": "${containerWorkspaceFolder}/rgdrive/rootfs/usr/sbin/generate-config.sh"
+    "GENERATE_CONFIG": "${containerWorkspaceFolder}/rgdrive/rootfs/usr/sbin/generate-config"
   },
 
   // Use 'forwardPorts' to make a list of ports inside the container available locally.

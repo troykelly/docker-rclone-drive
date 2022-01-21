@@ -4,7 +4,7 @@
 RCLONE=$(command -v rclone)
 
 if [ -z "${GENERATE_CONFIG}" ]; then
-  GENERATE_CONFIG="/usr/sbin/generate-config.sh"
+  GENERATE_CONFIG="/usr/sbin/generate-config"
 fi
 
 if [ -z "${RCLONE_CONFIG}" ]; then
@@ -16,7 +16,7 @@ if [ -z "${RCLONE_PRIMARY_STORE}" ]; then
 fi
 
 if [ -z "${RCLONE_CRYPT_STORE}" ]; then
-  RCLONE_CRYPT_STORE=gcrypt
+  RCLONE_CRYPT_STORE=${RCLONE_PRIMARY_STORE}-crypt
 fi
 
 if [ -z "${DRIVE_TARGETFOLDER}" ]; then
