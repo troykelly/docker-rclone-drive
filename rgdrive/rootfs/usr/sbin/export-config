@@ -1,0 +1,59 @@
+#!/usr/bin/env sh
+# set -e
+
+if [ -z "${GENERATE_CONFIG}" ]; then
+  GENERATE_CONFIG="/usr/sbin/generate-config"
+fi
+
+if [ -z "${RCLONE_CONFIG}" ]; then
+  RCLONE_CONFIG="${HOME}/.config/rclone/rclone.conf"
+fi
+
+if [ -z "${RCLONE_CONFIG_DIR}" ]; then
+  RCLONE_CONFIG_DIR=$(dirname "${RCLONE_CONFIG}")
+fi
+
+if [ -z "${SERVICE_ACCOUNT_FILE}" ]; then
+  SERVICE_ACCOUNT_FILE="${RCLONE_CONFIG_DIR}/sa-${RCLONE_PRIMARY_STORE}.conf"
+fi
+
+if [ -z "${SERVICE_ACCOUNT_DIR}" ]; then
+  SERVICE_ACCOUNT_DIR=$(dirname "${SERVICE_ACCOUNT_FILE}")
+fi
+
+if [ -z "${RCLONE_PRIMARY_STORE}" ]; then
+  RCLONE_PRIMARY_STORE=gdrive
+fi
+
+if [ -z "${EXPORT_DIR}" ]; then
+  EXPORT_DIR="/export"
+fi
+
+if [ -z "${EXPORT_FILE}" ]; then
+  EXPORT_FILE="/${EXPORT_DIR}/${RCLONE_PRIMARY_STORE}-$(date +%s).tgz"
+fi
+
+EXPORT_DIR=$(dirname "${EXPORT_FILE}")
+RCLONE_CONFIG_LOG="${RCLONE_CONFIG_DIR}/config.log"
+
+if [[ ! -x "$GENERATE_CONFIG" ]]
+then
+  echo "Unable to generate configuration. ${GENERATE_CONFIG} is not executable."
+  exit 3
+fi
+
+# Generate configuration files
+if ! "${GENERATE_CONFIG}"; then
+  echo "Failed to generate configuration file."
+  exit 4
+fi
+if [ ! -f "${RCLONE_CONFIG}" ]; then
+  echo "Configuration generation incomplete or failed."
+  exit 5
+fi
+
+mkdir -p "${EXPORT_DIR}"
+rm -f "${EXPORT_FILE}"
+tar zcf "${EXPORT_FILE}" -C "${RCLONE_CONFIG_DIR}" "$(basename ${RCLONE_CONFIG})" -C "${SERVICE_ACCOUNT_DIR}" "$(basename ${SERVICE_ACCOUNT_FILE})" -C "$(dirname ${RCLONE_CONFIG_LOG})" "$(basename ${RCLONE_CONFIG_LOG})"
+
+echo "⌛️ Export complete. Saved as ${EXPORT_FILE}"

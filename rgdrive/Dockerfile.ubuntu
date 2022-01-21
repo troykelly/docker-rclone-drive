@@ -28,8 +28,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     adduser --disabled-login --home /home/${APP_USER} --shell /sbin/nologin --uid 1000 --ingroup ${APP_GROUP} --gecos "${APP_USER},,,,Script User" ${APP_USER} && \
     mkdir -p /mount /home/${APP_USER}/.config/rclone && \
     chown -R ${APP_USER}:${APP_GROUP} /mount /home/${APP_USER} && \
-    chmod +x /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh && \
-    chgrp -R ${APP_GROUP} /usr/sbin/mount.sh /usr/sbin/push.sh /usr/sbin/generate-config.sh /usr/sbin/healthcheck.sh
+    chmod +x /usr/sbin/mount /usr/sbin/push /usr/sbin/generate-config /usr/sbin/healthcheck && \
+    chgrp -R ${APP_GROUP} /usr/sbin/mount /usr/sbin/push /usr/sbin/generate-config /usr/sbin/healthcheck
 
 WORKDIR /home/${APP_USER}
 
@@ -51,9 +51,9 @@ HEALTHCHECK --interval=30s \
     --timeout=30s \
     --start-period=4m \
     --retries=3 \
-    CMD /usr/sbin/healthcheck.sh
+    CMD /usr/sbin/healthcheck
 
-CMD ["/usr/sbin/mount.sh"]
+CMD ["/usr/sbin/mount"]
 
 LABEL \
     maintainer="Troy Kelly <troy@troykelly.com>" \
