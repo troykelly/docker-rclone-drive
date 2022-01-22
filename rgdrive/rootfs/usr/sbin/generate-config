@@ -41,6 +41,30 @@ if [ -z "${RCLONE_LOG_LEVEL}" ]; then
   RCLONE_LOG_LEVEL=ERROR
 fi
 
+if [ -z "${ACKNOWLEDGE_ABUSE}" ]; then
+  ACKNOWLEDGE_ABUSE=false
+elif [ "${ACKNOWLEDGE_ABUSE}" == "true" ]; then
+  ACKNOWLEDGE_ABUSE=true
+else
+  ACKNOWLEDGE_ABUSE=false
+fi
+
+if [ -z "${SERVER_SIDE_ACROSS_CONFIGS}" ]; then
+  SERVER_SIDE_ACROSS_CONFIGS=false
+elif [ "${SERVER_SIDE_ACROSS_CONFIGS}" == "true" ]; then
+  SERVER_SIDE_ACROSS_CONFIGS=true
+else
+  SERVER_SIDE_ACROSS_CONFIGS=false
+fi
+
+if [ -z "${FAST_LIST}" ]; then
+  FAST_LIST=false
+elif [ "${FAST_LIST}" == "true" ]; then
+  FAST_LIST=true
+else
+  FAST_LIST=false
+fi
+
 if [ -z "${SHARE_UID}" ]; then
   SHARE_UID=1000
 fi
@@ -57,6 +81,12 @@ fi
 
 if [ -z "${SERVICE_ACCOUNT_FILE}" ]; then
   SERVICE_ACCOUNT_FILE="${RCLONE_CONFIG_DIR}/sa-${RCLONE_PRIMARY_STORE}.conf"
+fi
+
+SERVICE_ACCOUNT_FILE_CONFIG="${SERVICE_ACCOUNT_FILE}"
+
+if [ "$(dirname """${RCLONE_CONFIG}""")" == "$(dirname """${SERVICE_ACCOUNT_FILE_CONFIG}""")" ]; then
+  SERVICE_ACCOUNT_FILE_CONFIG="\${RCLONE_CONFIG_DIR}/$(basename """${SERVICE_ACCOUNT_FILE_CONFIG}""")"
 fi
 
 if [ -z "${FORCE_NO_CRYPT}" ]; then
@@ -76,6 +106,7 @@ fi
 if [ -n "${DRIVE_ACCESSTOKEN}" ] && [ -n "${DRIVE_REFRESHTOKEN}" ] && [ -n "${DRIVE_TOKENEXPIRY}" ]; then
   RCLONE_TOKEN="{\"access_token\":\"${DRIVE_ACCESSTOKEN}\",\"token_type\":\"Bearer\",\"refresh_token\":\"${DRIVE_REFRESHTOKEN}\",\"expiry\":\"${DRIVE_TOKENEXPIRY}\"}"
   SERVICE_ACCOUNT_FILE=
+  SERVICE_ACCOUNT_FILE_CONFIG=
 else
   RCLONE_TOKEN=
 fi
@@ -151,7 +182,7 @@ if [ "$FORCE_NO_CRYPT" == "true" ]; then
 fi
 
 if [ -n "${RCLONE_TOKEN}" ]; then
-  "${RCLONE}" config create --non-interactive --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id="${GOOGLE_CLIENTID}" client_secret="${GOOGLE_CLIENTSECRET}" scope=drive root_folder_id="${RCLONE_ROOT_FOLDER_ID}" team_drive="${RCLONE_TEAM_DRIVE}" config_team_drive="${RCLONE_TEAM_DRIVE}" use_trash=false skip_gdocs=true chunk_size=32M token="${RCLONE_TOKEN}" config_refresh_token=false config_change_team_drive="${RCLONE_TEAMDRIVE}" >> "${RCLONE_CONFIG_LOG}" 2>&1
+  "${RCLONE}" config create --non-interactive --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id="${GOOGLE_CLIENTID}" client_secret="${GOOGLE_CLIENTSECRET}" scope=drive root_folder_id="${RCLONE_ROOT_FOLDER_ID}" team_drive="${RCLONE_TEAM_DRIVE}" config_team_drive="${RCLONE_TEAM_DRIVE}" use_trash=false skip_gdocs=true chunk_size=32M token="${RCLONE_TOKEN}" config_refresh_token=false config_change_team_drive="${RCLONE_TEAMDRIVE}" impersonate="${USER_EMAIL}" acknowledge_abuse="${ACKNOWLEDGE_ABUSE}" server_side_across_configs="${SERVER_SIDE_ACROSS_CONFIGS}" fast_list="${FAST_LIST}" >> "${RCLONE_CONFIG_LOG}" 2>&1
 else
   cat << EOF > "${SERVICE_ACCOUNT_FILE}"
 {
@@ -168,7 +199,7 @@ else
 }
 EOF
 
-  "${RCLONE}" config create --non-interactive --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id="${GOOGLE_CLIENTID}" client_secret="${GOOGLE_CLIENTSECRET}" scope=drive root_folder_id="${RCLONE_ROOT_FOLDER_ID}" team_drive="${RCLONE_TEAM_DRIVE}" config_team_drive="${RCLONE_TEAM_DRIVE}" use_trash=false skip_gdocs=true chunk_size=32M service_account_file="${SERVICE_ACCOUNT_FILE}" config_change_team_drive="${RCLONE_TEAMDRIVE}" >> "${RCLONE_CONFIG_LOG}" 2>&1
+  "${RCLONE}" config create --non-interactive --config "${RCLONE_CONFIG}" "${RCLONE_PRIMARY_STORE}" drive client_id="${GOOGLE_CLIENTID}" client_secret="${GOOGLE_CLIENTSECRET}" scope=drive root_folder_id="${RCLONE_ROOT_FOLDER_ID}" team_drive="${RCLONE_TEAM_DRIVE}" config_team_drive="${RCLONE_TEAM_DRIVE}" use_trash=false skip_gdocs=true chunk_size=32M service_account_file="${SERVICE_ACCOUNT_FILE_CONFIG}" config_change_team_drive="${RCLONE_TEAMDRIVE}" impersonate="${USER_EMAIL}" acknowledge_abuse="${ACKNOWLEDGE_ABUSE}" server_side_across_configs="${SERVER_SIDE_ACROSS_CONFIGS}" fast_list="${FAST_LIST}" >> "${RCLONE_CONFIG_LOG}" 2>&1
 fi
 
 if [ "$RCLONE_CACHE" == "true" ]; then
