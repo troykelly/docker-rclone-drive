@@ -31,7 +31,7 @@ jobs:
       build_date: ${{ steps.information.outputs.build_date }}
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: ℹ️ Gather version and environment
         id: information
         # yamllint disable rule:line-length
@@ -63,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⤵️ Check out code from GitHub
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Latest Docker
         # yamllint disable rule:line-length
